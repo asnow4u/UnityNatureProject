@@ -101,7 +101,7 @@ public partial class TerrainMain : MonoBehaviour
     private void UpdateMidground(float angle, int i){
 
       //Pick Random distance from center point
-      float dist = Random.Range(12.0f, 18.0f);
+      float dist = Random.Range(12.0f, 58.0f);
 
       //Get x and y position
       Vector2 pos = new Vector2();
@@ -134,7 +134,7 @@ public partial class TerrainMain : MonoBehaviour
     private void UpdateBackground(float angle, int i){
 
       //Pick Random distance from center point
-      float dist = Random.Range(22.0f, 25.0f);
+      float dist = Random.Range(62.0f, 65.0f);
 
       //Get x and y position
       Vector2 pos = new Vector2();

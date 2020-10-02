@@ -5,87 +5,95 @@ using UnityEngine;
 public partial class GardianController : MonoBehaviour
 {
 
-    //TODO: Be able to put multiple objects with swingtree
-    public float swingSpeed;
-    // private GameObject[] swingTree; //TODO: will grab from enviroment. Enviroment to update array when it changes, or might grab array from enviroment
-    public GameObject swingTree;
-    private Vector3 swingPoint;
+    private GameObject[] swingTreePoints; //TODO: will grab from enviroment. Enviroment to update array when it changes, or might grab array from enviroment
+    private GameObject curSwingPoint;
+    // public float swingSpeed;
+    public float swingRange;
     private float swingAngle;
-    private float swingHeight;
 
-
-    /* UpdateTreeSwingPoints
-      => Loop through available swinging trees and determine if close enough
-    */
-    private void UpdateSwingPoints(){
-
-      //TODO: Determine how many swingtrees are in play
-      // for (int i=0; i<numSwingTrees; i++){
-        swingTree.GetComponent<SwingTreeHandler>().CheckDistance(transform.position, clockWiseDirection);
-
-      // }
-
-    }
 
 
     /* UseSwingItem
 
     */
     public void UseSwingItem(){
-      //TODO: loop through all the swing trees
-      // for (int i=0; i<swingTrees.Length; i++){
 
-        if (swingTree.GetComponent<SwingTreeHandler>().GetSwingable()){
+      foreach (GameObject swingPoint in swingTreePoints){
+
+        float dist = Vector3.Distance(transform.position, swingPoint.transform.position);
+        // Debug.Log("dist: " + dist);
+
+        if (dist <= swingRange && IsFacingTreeDirection(swingPoint)){
 
           animator.SetTrigger("swing");
-          swingPoint = swingTree.GetComponent<SwingTreeHandler>().GetSwingPoint();
+          curSwingPoint = swingPoint;
 
-          //Determine angle difference between player and tree
-          swingAngle = Vector2.Angle(new Vector2(transform.position.x, transform.position.z), new Vector2(swingPoint.x, swingPoint.z));
-          swingHeight = swingPoint.y - transform.position.y;
+          float heightDiff = curSwingPoint.transform.position.y - transform.position.y;
+          swingAngle = Mathf.Asin(heightDiff / dist);
+
+          moveSpeed = maxMoveSpeed * Mathf.Cos(swingAngle);
+          moveSpeed = clockWiseDirection ? moveSpeed : (-1)*moveSpeed;
+          
+          rb.AddForce(Vector3.up * maxMoveSpeed * Mathf.Sin(swingAngle) * 80f, ForceMode.Impulse); // torgue force
 
         }
-      // }
+      }
 
       //IDEA: could put a failed item use
       //TODO: will need to add to animator
-      // if (curState != state.swing){
-      //   Debug.Log("Swing Failed");
-      // }
 
     }
+
+
+    /* IsFacingTreeDirection
+      => Determine if player is facing towards the swing tree
+      => Based on the position of the swingPoint, determine the quadrent the tree is in
+      => Based on quadrent and player direction determine if in sight
+    */
+    private bool IsFacingTreeDirection(GameObject swingPoint){
+
+      //Top half
+      if (swingPoint.transform.position.z >= 0 ){
+
+        //Counter Clockwise
+        if (!clockWiseDirection && transform.position.x >= swingPoint.transform.position.x){
+          return true;
+        }
+
+        //Clockwise
+        if (clockWiseDirection && transform.position.x <= swingPoint.transform.position.x){
+          return true;
+        }
+
+      //Bottom half
+      } else {
+
+        //Counter Clockwise
+        if (!clockWiseDirection && transform.position.x <= swingPoint.transform.position.x){
+          return true;
+        }
+
+        //ClockWise
+        if (clockWiseDirection && transform.position.x >= swingPoint.transform.position.x){
+          return true;
+        }
+      }
+
+      return false;
+    }
+
 
 
     //TODO: should not be able to collide with enimies when swinging but can still collide with ground obj which should cancel swing
     /* UpdateTreeSwing
       => Check to see if alouted time has passed
-      => Update position
     */
     private void UpdateSwing(){
 
-      //TODO: make swing stop if player is past point(x,z) as well
+      //Determine player has reached/passed point
+      if (!IsFacingTreeDirection(curSwingPoint)){
+        curSwingPoint = null;
 
-      //Determine player has reached point height
-      if (swingPoint.y - transform.position.y <= 0){ //NOTE will need to solve if player is above point
-
-
-
-      } else {
-
-        //Determine time to swing
-        float swingTime = swingAngle / swingSpeed;
-
-        if (swingTime < 1){
-          swingTime = 1;
-        }
-
-        //Determine nessisary height intervals
-        float swingHeightInterval = swingHeight / swingTime;
-
-        //Update Movement
-        rb.velocity = transform.up * swingHeightInterval;
-        momentumSpeed = swingSpeed;
-        transform.RotateAround(Vector3.zero, new Vector3(0,1,0), swingSpeed * Time.deltaTime);
       }
     }
 

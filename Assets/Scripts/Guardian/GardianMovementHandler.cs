@@ -6,10 +6,19 @@ public partial class GardianController : MonoBehaviour
 {
 
     private float momentumSpeed;
+
+    public float maxMoveSpeed;
+    public float accelerationRate;
+    private float dragRate;
+    public float drag;
+    public float airDrag;
     public float moveSpeed;
+
     public float jumpForce;
-    public float fallForce;
+    public float fallMultiplier;
+    public float lowJumpMultiplier;
     private bool clockWiseDirection;
+
 
     /* UpdateMovement
       => Through Controller input, move player around the center point
@@ -18,57 +27,71 @@ public partial class GardianController : MonoBehaviour
     */
     public void UpdateMovement(float moveStick){
 
-      //Ground movement
-      if (IsGrounded()){
-
-        UpdateDirection(moveStick);
-
-        //Set animation value
-        if (clockWiseDirection){
-          animator.SetFloat("moveStick", moveStick);
-        } else {
-          animator.SetFloat("moveStick", moveStick * (-1));
-        }
-
-        //Attack state
-        if (animator.GetCurrentAnimatorStateInfo(0).IsName("Attack1")){
-          momentumSpeed = moveStick * moveSpeed/2;
-
-        //Dodge state
-        } else if (animator.GetCurrentAnimatorStateInfo(0).IsName("Dodge")){
-          momentumSpeed = moveStick * moveSpeed/2;
-
-        } else if (!animator.GetCurrentAnimatorStateInfo(0).IsName("Item") || !animator.GetCurrentAnimatorStateInfo(0).IsName("Swing")){
-          momentumSpeed = moveStick * moveSpeed;
-        }
-
-        transform.RotateAround(Vector3.zero, new Vector3(0,1,0), momentumSpeed * Time.deltaTime);
-
-
-      //Air movement
-      } else {
-
-        UpdateDirection(moveStick);
-
-        //TODO: make slight adjustments based on user input (Test)
-        transform.RotateAround(Vector3.zero, new Vector3(0,1,0), (momentumSpeed) * Time.deltaTime);
+      //Check for direction change
+      if ((moveStick > 0f && !clockWiseDirection) || (moveStick < 0f && clockWiseDirection)){
+        FlipDirection();
       }
+
+      //Check if swinging
+      if (curSwingPoint == null){
+
+        //Ground movement
+        if (IsGrounded()){
+
+          //Set dragRate based on moveStick
+          if ((moveSpeed > 0 && !clockWiseDirection) || (moveSpeed < 0 && clockWiseDirection)){
+            dragRate = drag;
+            //TODO: Set animator for slide stop animation
+
+          } else {
+            dragRate = 1f;
+          }
+
+          //Slow down to a stop
+          if (moveStick == 0f){
+            moveSpeed *= 0.95f;
+
+          } else {
+            moveSpeed += accelerationRate * dragRate * moveStick * Time.deltaTime;
+          }
+
+          //Set animation value
+          animator.SetFloat("moveStick", Mathf.Abs(moveStick));
+
+        //Air movement
+        } else {
+
+          //Set dragRate based on moveStick
+          if ((moveSpeed > 0 && !clockWiseDirection) || (moveSpeed < 0 && clockWiseDirection)){
+            dragRate = airDrag;
+            moveSpeed += accelerationRate * dragRate * moveStick * Time.deltaTime;
+
+          } else {
+            dragRate = 1f;
+          }
+        }
+      }
+
+
+      //Check if above maxspeed
+      if (Mathf.Abs(moveSpeed) > maxMoveSpeed){
+        moveSpeed = clockWiseDirection ? maxMoveSpeed : (-1)*maxMoveSpeed;
+      }
+
+      transform.RotateAround(Vector3.zero, new Vector3(0,1,0), moveSpeed);
     }
 
 
     /* UpdateJump
 
     */
-    public void UpdateJump(){
+    public void Jump(){
 
       if (IsGrounded()){
-        if (animator.GetCurrentAnimatorStateInfo(0).IsName("Idle") || animator.GetCurrentAnimatorStateInfo(0).IsName("Movement")){
-          animator.SetTrigger("jump");
+        animator.SetTrigger("jump");
+        //TODO: jump animation will need to be short for a instantaneous reaction to the players input. mostly involving the upper body as to not interupt movement from the legs.
 
-          //TODO: jump animation will need to be short for a instantaneous reaction to the players input. mostly involving the upper body as to not interupt movement from the legs.
-
-          rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-        }
+        rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
       }
     }
 
@@ -86,25 +109,35 @@ public partial class GardianController : MonoBehaviour
     /* UpdateDirection
 
     */
-    public void UpdateDirection(float moveStick){
+    public void FlipDirection(){
 
-      //ClockWise direction
-      if (clockWiseDirection){
-
-        if (moveStick < 0){
-          clockWiseDirection = false;
-          transform.Rotate(0f, 180f, 0f);
-        }
-
-      //Counter clockwise direction
-      } else {
-
-        if (moveStick > 0){
-          clockWiseDirection = true;
-          transform.Rotate(0f, 180f, 0f);
-        }
-
-      }
-
+        clockWiseDirection = !clockWiseDirection;
+        transform.Rotate(0f, 180f, 0f);
     }
+
+
+    /* UpdateForces
+      => Update any forces on player
+      => Implement gravity force if player is falling
+    */
+    //TODO: Either here or in a new function, apply small forces to nudge the player back to the center if they are off.
+    private void UpdateForces(){
+
+      //Swing Force
+      if (curSwingPoint != null){
+        UpdateSwing();
+
+      //Small Jump / Fall force
+      } else {
+        if (rb.velocity.y < 0){
+          rb.velocity += Vector3.up * Physics.gravity.y * (fallMultiplier - 1) * Time.deltaTime;
+
+        } else if (rb.velocity.y > 0 && !OVRInput.Get(OVRInput.RawButton.A)){
+          rb.velocity += Vector3.up * Physics.gravity.y * (lowJumpMultiplier - 1) * Time.deltaTime;
+
+        }
+      }
+    }
+
+
 }

@@ -8,6 +8,7 @@ TagManager:
   - Terrain
   - Enemy
   - Reticle
+  - SwingPoint
   layers:
   - Default
   - TransparentFX

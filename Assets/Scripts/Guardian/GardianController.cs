@@ -11,6 +11,8 @@ public partial class GardianController : MonoBehaviour
     private Rigidbody rb;
     public LayerMask groundLayer;
 
+    public float groundDist;
+
     private Vector3 preLocation;
     private float distanceTraveled;
 
@@ -30,6 +32,9 @@ public partial class GardianController : MonoBehaviour
 
       animator = GetComponent<Animator>();
       rb = GetComponent<Rigidbody>();
+
+      //TODO: the swingPoints will come from
+      swingTreePoints = GameObject.FindGameObjectsWithTag("SwingPoint");
     }
 
 
@@ -48,14 +53,12 @@ public partial class GardianController : MonoBehaviour
       }
 
       //Check if swinging
-      if (animator.GetCurrentAnimatorStateInfo(0).IsName("Swing")){
-        UpdateSwing();
-      }
-
+      // if (animator.GetCurrentAnimatorStateInfo(0).IsName("Swing")){
+      //   UpdateSwing();
+      // }
 
       UpdateForces();
       UpdateProgression();
-      UpdateSwingPoints();
 
       //Update isGrounded bool with animator
       if (IsGrounded()){
@@ -67,23 +70,6 @@ public partial class GardianController : MonoBehaviour
       //TEST
       Debug.Log("Grounded: " + IsGrounded());
 
-    }
-
-
-    //TODO: Either here or in a new function, apply small forces to nudge the player back to the center if they are off.
-    /* UpdateForces
-      => Update any forces on player
-      => Implement gravity force if player is falling
-    */
-    private void UpdateForces(){
-      // Downward force in the air
-      if (rb.velocity.y < 0 && !IsGrounded()){
-        rb.velocity += Vector3.up * Physics.gravity.y * fallForce * Time.deltaTime;
-
-      //Applying continual jump force
-      } else if (rb.velocity.y > 0 && OVRInput.Get(OVRInput.RawButton.LIndexTrigger)){
-        rb.velocity += Vector3.up * Physics.gravity.y * fallForce / 2 * Time.deltaTime;
-      }
     }
 
 
@@ -111,7 +97,7 @@ public partial class GardianController : MonoBehaviour
       => Check that the player is on the ground
     */
     public bool IsGrounded(){
-      return Physics.Raycast(transform.position, -Vector3.up, 1, groundLayer);
+      return Physics.Raycast(transform.position, -Vector3.up, groundDist, groundLayer);
     }
 
 

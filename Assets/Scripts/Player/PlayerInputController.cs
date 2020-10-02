@@ -119,8 +119,8 @@ public partial class PlayerInputController : MonoBehaviour
       spirit.GetComponent<GardianController>().UpdateMovement(moveStick.x);
 
       // Jumping
-      if (OVRInput.GetDown(OVRInput.RawButton.LHandTrigger)){
-        spirit.GetComponent<GardianController>().UpdateJump();
+      if (OVRInput.GetDown(OVRInput.RawButton.A)){
+        spirit.GetComponent<GardianController>().Jump();
       }
 
       // Attack
@@ -130,13 +130,13 @@ public partial class PlayerInputController : MonoBehaviour
 
       // Item
       if (OVRInput.GetDown(OVRInput.RawButton.LIndexTrigger)){
-        //spirit.GetComponent<GardianController>().UseItem();
+        spirit.GetComponent<GardianController>().UseItem();
       }
 
       // Dodge
-      if (OVRInput.GetDown(OVRInput.RawButton.A)){
+      // if (OVRInput.GetDown(OVRInput.RawButton.A)){
         //spirit.GetComponent<GardianController>().UpdateDodge();
-      }
+      // }
 
       if (OVRInput.Get(OVRInput.RawAxis1D.RHandTrigger) > 0f){
 
@@ -208,7 +208,7 @@ public partial class PlayerInputController : MonoBehaviour
 
       // Jumping
       if (OVRInput.GetDown(OVRInput.RawButton.RIndexTrigger)){
-        spirit.GetComponent<GardianController>().UpdateJump();
+        spirit.GetComponent<GardianController>().Jump();
       }
 
       //Get current action

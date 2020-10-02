@@ -137,7 +137,7 @@ public class GardianProjectile : MonoBehaviour
     private void TestEnemyHit(){
       Collider[] enemiesHit = Physics.OverlapSphere(new Vector3(transform.position.x, transform.position.y, transform.position.z), 1f, enemyLayer);
       for (int i=0; i < enemiesHit.Length; i++){
-        enemiesHit[i].GetComponent<EnemyHealthHandler>().HitDamage(30);
+        //enemiesHit[i].GetComponent<EnemyHealthHandler>().HitDamage(30);
         DestroyProjectile(false);
       }
     }

@@ -80,11 +80,13 @@ public partial class TerrainMain : MonoBehaviour
         //Determine which vertices go to which quadrent
         for (int i=0; i<vertices.Length; i++){
 
+          Vector3 center = new Vector3(0.0f, 0.0f, vertices[i].z);
+          float dist = Vector3.Distance(vertices[i], center);
+
           // Check that vertice is part of the path
           if (vertices[i].z > 0.01){
 
-            Vector3 center = new Vector3(0.0f, 0.0f, vertices[i].z);
-            float dist = Vector3.Distance(vertices[i], center);
+
 
             // Get the center point between the center and the vertex
             dist = Mathf.Sqrt((dist*dist)/2);
