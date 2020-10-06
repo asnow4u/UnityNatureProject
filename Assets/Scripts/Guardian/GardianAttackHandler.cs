@@ -13,8 +13,8 @@ public partial class GardianController : MonoBehaviour
 
     public GameObject bowBone;
     public GameObject aimCursor;
-    private Vector3 startPosition;
-    private Quaternion startRotation;
+    private float cursorHeight;
+    private Quaternion cursorStartRotation;
 
     public float cursorRange;
     public float projectileSpeed;
@@ -117,17 +117,27 @@ public partial class GardianController : MonoBehaviour
       //Update angle 0 - 360
       if (angle < 0f){
         angle += 360f;
+
+      //Set cursor position
+      } else if (angle == 0){
+        if (!clockWiseDirection){
+          angle += 180f;
+        }
       }
 
+      //Check to see which side the cursor is on
       if ((clockWiseDirection && angle > 90f && angle < 270f) || (!clockWiseDirection && (angle <= 90f || angle >= 270f))){
         FlipDirection();
       }
 
-      //TODO fix angle when direction is flipped
+      //Update angle because it gets reversed
+      if (!clockWiseDirection){
+        angle = Mathf.Abs(angle - 360);
+      }
 
       //Update Cursor
-      aimCursor.transform.rotation = Quaternion.AngleAxis(angle * (-1), transform.right) * startRotation;
-      aimCursor.transform.position = startPosition + aimCursor.transform.forward * cursorRange;
+      aimCursor.transform.rotation = Quaternion.AngleAxis(angle * (-1), transform.right) * cursorStartRotation;
+      aimCursor.transform.position = new Vector3(transform.position.x, transform.position.y + cursorHeight, transform.position.z) + aimCursor.transform.forward * cursorRange;
 
       Debug.Log(angle);
 
