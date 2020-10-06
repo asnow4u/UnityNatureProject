@@ -18,8 +18,7 @@ public partial class GardianController : MonoBehaviour
 
     public float cursorRange;
     public float projectileSpeed;
-    private float projectileXSpeed;
-    private float projectileYSpeed;
+    private float projectileAngle;
 
     private enum action {water, thorn, yellow, red}
     private action curAction;
@@ -44,31 +43,28 @@ public partial class GardianController : MonoBehaviour
     */
     public void UpdateAttack(){
 
-      UpdateProjectileSpeed();
-
       switch(curAction){
         case action.water:
           GameObject spawnedWaterProjectile = Instantiate(waterProjectile, new Vector3(transform.position.x, transform.position.y + 3f, transform.position.z) + (transform.forward * 2f), Quaternion.identity);
 
           if (clockWiseDirection){
-            spawnedWaterProjectile.GetComponent<GardianProjectile>().SetMoveForces(projectileXSpeed, projectileYSpeed);
+            spawnedWaterProjectile.GetComponent<GardianProjectile>().SetMoveForces(projectileSpeed, projectileAngle);
+            spawnedWaterProjectile.transform.Rotate(Mathf.Abs(projectileAngle - 360), 90f, 0f);
           } else {
-            spawnedWaterProjectile.GetComponent<GardianProjectile>().SetMoveForces((-1) * projectileXSpeed, projectileYSpeed);
+            spawnedWaterProjectile.GetComponent<GardianProjectile>().SetMoveForces((-1) * projectileSpeed, projectileAngle);
+            spawnedWaterProjectile.transform.Rotate(projectileAngle, 90f, 0f);
           }
-
-          spawnedWaterProjectile.transform.rotation = bowBone.transform.rotation;
-          spawnedWaterProjectile.transform.Rotate(-90f, 0f, 0f);
 
           break;
 
         case action.thorn:
           GameObject spawnedThornProjectile = Instantiate(thornProjectile, new Vector3(transform.position.x, transform.position.y + 3f, transform.position.z) + (transform.forward * 2f), Quaternion.identity);
-          spawnedThornProjectile.GetComponent<GardianProjectile>().SetMoveForces(projectileXSpeed, projectileYSpeed);
+          // spawnedThornProjectile.GetComponent<GardianProjectile>().SetMoveForces(projectileXSpeed, projectileYSpeed);
 
           if (clockWiseDirection){
-            spawnedThornProjectile.GetComponent<GardianProjectile>().SetMoveForces(projectileXSpeed, projectileYSpeed);
+            // spawnedThornProjectile.GetComponent<GardianProjectile>().SetMoveForces(projectileXSpeed, projectileYSpeed);
           } else {
-            spawnedThornProjectile.GetComponent<GardianProjectile>().SetMoveForces((-1) * projectileXSpeed, projectileYSpeed);
+            // spawnedThornProjectile.GetComponent<GardianProjectile>().SetMoveForces((-1) * projectileXSpeed, projectileYSpeed);
           }
 
           spawnedThornProjectile.transform.rotation = bowBone.transform.rotation;
@@ -77,12 +73,12 @@ public partial class GardianController : MonoBehaviour
 
         case action.yellow:
           GameObject spawnedProjectile = Instantiate(projectile, new Vector3(transform.position.x, transform.position.y + 3f, transform.position.z) + (transform.forward * 2f), Quaternion.identity);
-          spawnedProjectile.GetComponent<GardianProjectile>().SetMoveForces(projectileXSpeed, projectileYSpeed);
+          // spawnedProjectile.GetComponent<GardianProjectile>().SetMoveForces(projectileXSpeed, projectileYSpeed);
 
           if (clockWiseDirection){
-            spawnedProjectile.GetComponent<GardianProjectile>().SetMoveForces(projectileXSpeed, projectileYSpeed);
+            // spawnedProjectile.GetComponent<GardianProjectile>().SetMoveForces(projectileXSpeed, projectileYSpeed);
           } else {
-            spawnedProjectile.GetComponent<GardianProjectile>().SetMoveForces((-1) * projectileXSpeed, projectileYSpeed);
+            // spawnedProjectile.GetComponent<GardianProjectile>().SetMoveForces((-1) * projectileXSpeed, projectileYSpeed);
           }
 
           spawnedProjectile.transform.rotation = bowBone.transform.rotation;
@@ -94,9 +90,9 @@ public partial class GardianController : MonoBehaviour
 
 
           if (clockWiseDirection){
-            spawnedTempProjectile.GetComponent<GardianProjectile>().SetMoveForces(projectileXSpeed, projectileYSpeed);
+            // spawnedTempProjectile.GetComponent<GardianProjectile>().SetMoveForces(projectileXSpeed, projectileYSpeed);
           } else {
-            spawnedTempProjectile.GetComponent<GardianProjectile>().SetMoveForces((-1) * projectileXSpeed, projectileYSpeed);
+            // spawnedTempProjectile.GetComponent<GardianProjectile>().SetMoveForces((-1) * projectileXSpeed, projectileYSpeed);
           }
 
           spawnedTempProjectile.transform.rotation = bowBone.transform.rotation;
@@ -112,112 +108,38 @@ public partial class GardianController : MonoBehaviour
     */
     public void UpdateAim(Vector2 aimStick){
 
-      float angle = Mathf.Atan2(aimStick.y, aimStick.x) * Mathf.Rad2Deg;
+      projectileAngle = Mathf.Atan2(aimStick.y, aimStick.x) * Mathf.Rad2Deg;
 
       //Update angle 0 - 360
-      if (angle < 0f){
-        angle += 360f;
+      if (projectileAngle < 0f){
+        projectileAngle += 360f;
 
       //Set cursor position
-      } else if (angle == 0){
+      } else if (projectileAngle == 0){
         if (!clockWiseDirection){
-          angle += 180f;
+          projectileAngle += 180f;
         }
       }
 
       //Check to see which side the cursor is on
-      if ((clockWiseDirection && angle > 90f && angle < 270f) || (!clockWiseDirection && (angle <= 90f || angle >= 270f))){
+      if ((clockWiseDirection && projectileAngle > 90f && projectileAngle < 270f) || (!clockWiseDirection && (projectileAngle <= 90f || projectileAngle >= 270f))){
         FlipDirection();
       }
 
-      //Update angle because it gets reversed
+      //Update Cursor
       if (!clockWiseDirection){
-        angle = Mathf.Abs(angle - 360);
+        projectileAngle = Mathf.Abs(projectileAngle - 360);
+        aimCursor.transform.rotation = Quaternion.AngleAxis(projectileAngle * (-1), transform.right) * transform.rotation * Quaternion.Euler(0, 180f, 0);
+        aimCursor.transform.position = new Vector3(transform.position.x, transform.position.y + cursorHeight, transform.position.z) + aimCursor.transform.forward * cursorRange;
+
+      } else {
+
+        //Update Cursor
+        aimCursor.transform.rotation = Quaternion.AngleAxis(projectileAngle * (-1), transform.right) * transform.rotation;
+        aimCursor.transform.position = new Vector3(transform.position.x, transform.position.y + cursorHeight, transform.position.z) + aimCursor.transform.forward * cursorRange;
       }
 
-      //Update Cursor
-      aimCursor.transform.rotation = Quaternion.AngleAxis(angle * (-1), transform.right) * cursorStartRotation;
-      aimCursor.transform.position = new Vector3(transform.position.x, transform.position.y + cursorHeight, transform.position.z) + aimCursor.transform.forward * cursorRange;
-
-      Debug.Log(angle);
-
-
-      //Under swinging height
-      // if (Physics.Raycast(transform.position, -Vector3.up, 4.5f, groundLayer)){
-      //
-      //   //Tilt up (0 -> 180)
-      //   if (angle >= 0f && angle <= 180f){
-      //
-      //     //Get range from 0 -> 90
-      //     angle /= 2;
-      //
-      //     //Update bow
-      //     bowBone.transform.rotation = Quaternion.AngleAxis(angle * (-1), transform.right);
-      //
-      //     //Degree to radians
-      //     angle = angle * Mathf.Deg2Rad;
-      //
-      //     projectileXSpeed = Mathf.Cos(angle) * projectileSpeed;
-      //     projectileYSpeed = Mathf.Sin(angle) * (projectileSpeed / 2f); //TODO: Work with projectileSpeed to get it to not go as far
-      //
-      //   //Tilt down (360 -> 180)
-      //   } else {
-      //
-      //     //Get range from 0 -> -90
-      //     angle -= 360;
-      //     angle /= 2;
-      //
-      //     //Update bow
-      //     bowBone.transform.rotation = Quaternion.AngleAxis(angle * (-1), transform.right);
-      //
-      //     //Degree to radians
-      //     angle = angle * Mathf.Deg2Rad;
-      //
-      //     projectileXSpeed = Mathf.Cos(angle) * projectileSpeed;
-      //     projectileYSpeed = Mathf.Sin(angle) * (projectileSpeed / 2f);
-      //
-      //   }
-      //
-      // //In air aiming
-      // } else {
-      //   //TODO slow down time
-      //
-      //   //Tilt forward (0 -> 180)
-      //   if (angle >= 0f && angle <= 180f){
-      //
-      //     //Get range from 0 -> 90
-      //     angle /= 2f;
-      //     angle -= 90f;
-      //
-      //     //Update bow
-      //     bowBone.transform.rotation = Quaternion.AngleAxis(angle * (-1), transform.right);
-      //
-      //     //Degree to radians
-      //     angle = angle * Mathf.Deg2Rad;
-      //
-      //     projectileXSpeed = Mathf.Cos(angle) * projectileSpeed;
-      //     projectileYSpeed = Mathf.Sin(angle) * (projectileSpeed / 2f);
-      //
-      //   //Tilt backward (360 -> 180)
-      //   } else {
-      //
-      //     //Get range from 0 -> -90
-      //     angle -= 360;
-      //     angle /= 2;
-      //     angle -= 90f;
-      //
-      //     //Update bow
-      //     bowBone.transform.rotation = Quaternion.AngleAxis(angle * (-1), transform.right);
-      //
-      //     //Degree to radians
-      //     angle = angle * Mathf.Deg2Rad;
-      //
-      //     projectileXSpeed = Mathf.Cos(angle) * projectileSpeed;
-      //     projectileYSpeed = Mathf.Sin(angle) * (projectileSpeed / 2f);
-      //
-      //   }
-      //
-      // }
+      //TODO: Get the bow to point towards the aimCursor
     }
 
 
@@ -238,29 +160,6 @@ public partial class GardianController : MonoBehaviour
         curAction = action.yellow;
 
       }
-    }
-
-
-    /*UpdateProjectileSpeed
-
-    */
-    private void UpdateProjectileSpeed(){
-
-      //TODO: Need to determine the apropriate projectile speeds
-      // float angle = bowBone.transform.eulerAngles.z;
-      // Debug.Log(angle);
-      //
-      // angle = 360 - angle;
-      // Debug.Log(angle);
-      //
-      // angle /= 4f;
-      // Debug.Log("angle2 :" + angle);
-
-      // angle = angle * Mathf.Deg2Rad;
-
-      projectileXSpeed = Mathf.Cos(shootAngle * Mathf.Deg2Rad) * projectileSpeed;
-      projectileYSpeed = Mathf.Sin(shootAngle * Mathf.Deg2Rad) * (projectileSpeed / 2f); //TODO: Work with projectileSpeed to get it to not go as far
-
     }
 
 }

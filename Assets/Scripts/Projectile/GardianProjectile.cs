@@ -8,11 +8,10 @@ public class GardianProjectile : MonoBehaviour
     public GameObject thornsPrefab;
     public LayerMask enemyLayer;
 
-    private float moveXSpeed;
-    private float moveYSpeed;
+    private float xVelocity;
+    private float yVelocity;
+
     private Rigidbody rb;
-    private bool forceApplied;
-    //TODO get direction of gardian
 
     private enum projectile {normal, water, thorn, temp}
     private projectile projectileType;
@@ -20,10 +19,9 @@ public class GardianProjectile : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-      forceApplied = false;
-      rb = GetComponent<Rigidbody>();
-
+      // rb = GetComponent<Rigidbody>();
       GetProjectileType();
+
     }
 
 
@@ -32,14 +30,6 @@ public class GardianProjectile : MonoBehaviour
     */
     void Update()
     {
-        //Apply forces
-        if (!forceApplied && rb){
-          if (moveYSpeed != 0){
-            rb.AddForce(Vector3.up * moveYSpeed, ForceMode.Impulse);
-            forceApplied = true;
-          }
-        }
-
 
         /*TODO: works ok, needs improvements:
             => Get inital launch angle, will take the place of "rot"
@@ -49,14 +39,14 @@ public class GardianProjectile : MonoBehaviour
         */
 
         //Update Movement
-        transform.RotateAround(Vector3.zero, new Vector3(0,1,0), moveXSpeed * Time.deltaTime);
+        transform.RotateAround(Vector3.zero, new Vector3(0,1,0), xVelocity * Time.deltaTime);
 
         //Update trajectory angle
-        float angle = Mathf.Atan2(rb.velocity.y, moveXSpeed);
-        angle *= Mathf.Rad2Deg;
-
-        Quaternion rot = transform.rotation = Quaternion.Euler(0, transform.eulerAngles.y, transform.eulerAngles.z);
-        transform.rotation = rot * Quaternion.AngleAxis(angle, transform.right);
+        // float angle = Mathf.Atan2(rb.velocity.y, moveXSpeed);
+        // angle *= Mathf.Rad2Deg;
+        //
+        // Quaternion rot = transform.rotation = Quaternion.Euler(0, transform.eulerAngles.y, transform.eulerAngles.z);
+        // transform.rotation = rot * Quaternion.AngleAxis(angle, transform.right);
 
 
         //Check for enemy and deal appropriate damage
@@ -144,11 +134,25 @@ public class GardianProjectile : MonoBehaviour
 
 
     /* SetMoveSpeed
-
+      => Update forces
+      IDEA: Could make default angles (0, 180) be a bit higher for a better firing angle for the arrows trajectory
     */
-    public void SetMoveForces(float xSpeed, float ySpeed){
-      moveXSpeed = xSpeed;
-      moveYSpeed = ySpeed;
+    public void SetMoveForces(float projectileMoveSpeed, float aimAngle){
+
+      float angle = aimAngle * Mathf.Deg2Rad;
+
+      if (projectileMoveSpeed < 0){
+        xVelocity = Mathf.Cos(angle) * (-1) * projectileMoveSpeed;
+      } else {
+        xVelocity = Mathf.Cos(angle) * projectileMoveSpeed;
+      }
+
+      Debug.Log("XV: " + xVelocity + " angle: " + angle + " speed: " + projectileMoveSpeed);
+
+
+      yVelocity = Mathf.Sin(angle) * projectileMoveSpeed;
+      rb = GetComponent<Rigidbody>();
+      rb.AddForce(Vector3.up * yVelocity, ForceMode.Impulse);
     }
 
 }

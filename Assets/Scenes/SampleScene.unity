@@ -1150,6 +1150,10 @@ PrefabInstance:
       propertyPath: m_TagString
       value: Enemy
       objectReference: {fileID: 0}
+    - target: {fileID: 1067925524328404, guid: 6bbfea6690ef7724ba495c866081f855, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4408297863206454, guid: 6bbfea6690ef7724ba495c866081f855, type: 3}
       propertyPath: m_LocalPosition.x
       value: -80
@@ -2447,7 +2451,7 @@ MonoBehaviour:
   bowBone: {fileID: 854866023}
   aimCursor: {fileID: 37241898}
   cursorRange: 3
-  projectileSpeed: 60
+  projectileSpeed: 40
   shootAngle: 0
   health: 100
   groundLayer:
@@ -2818,6 +2822,10 @@ PrefabInstance:
       propertyPath: m_TagString
       value: Enemy
       objectReference: {fileID: 0}
+    - target: {fileID: 1067925524328404, guid: 6bbfea6690ef7724ba495c866081f855, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4408297863206454, guid: 6bbfea6690ef7724ba495c866081f855, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -3050,6 +3058,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: EnemyGolem
+      objectReference: {fileID: 0}
+    - target: {fileID: 4789216417083504986, guid: f68900a076059c94d94afa3b0b121ae9,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4790375228860416184, guid: f68900a076059c94d94afa3b0b121ae9,
         type: 3}
