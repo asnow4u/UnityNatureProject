@@ -33,6 +33,9 @@ public partial class GardianController : MonoBehaviour
       animator = GetComponent<Animator>();
       rb = GetComponent<Rigidbody>();
 
+      startPosition = aimCursor.transform.position;
+      startRotation = aimCursor.transform.rotation;
+
       //TODO: the swingPoints will come from
       swingTreePoints = GameObject.FindGameObjectsWithTag("SwingPoint");
     }

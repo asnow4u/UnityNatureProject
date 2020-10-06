@@ -46,7 +46,7 @@ public partial class EnemyController : MonoBehaviour
       transform.RotateAround(Vector3.zero, new Vector3(0,1,0), moveSpeed * Time.deltaTime);
 
       //Ajust Enemy Model to the terrain
-      CalculateAngle();
+      GroundAngle();
 
     }
 
@@ -55,7 +55,7 @@ public partial class EnemyController : MonoBehaviour
       => Find the angle to rotate the enemy model based on terrain
       => Uses the normal of the enemy towards the ground to determine the nessisary adjustments
     */
-    private void CalculateAngle(){
+    private void GroundAngle(){
 
       RaycastHit hit;
       float angle;

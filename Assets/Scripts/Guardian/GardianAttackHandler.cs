@@ -6,13 +6,17 @@ public partial class GardianController : MonoBehaviour
 {
 
     public float attackRadius;
-    // public LayerMask enemyLayer;
     public GameObject projectile;
     public GameObject waterProjectile;
     public GameObject thornProjectile;
     public GameObject tempProjectile;
 
     public GameObject bowBone;
+    public GameObject aimCursor;
+    private Vector3 startPosition;
+    private Quaternion startRotation;
+
+    public float cursorRange;
     public float projectileSpeed;
     private float projectileXSpeed;
     private float projectileYSpeed;
@@ -102,100 +106,108 @@ public partial class GardianController : MonoBehaviour
     }
 
 
-    /* AimingProjectile
+
+    /* UpdatteAim
 
     */
-    public void AimingProjectile(float angle){
+    public void UpdateAim(Vector2 aimStick){
+
+      float angle = Mathf.Atan2(aimStick.y, aimStick.x) * Mathf.Rad2Deg;
+
+      //Update angle 0 - 360
+      if (angle < 0f){
+        angle += 360f;
+      }
+
+      if ((clockWiseDirection && angle > 90f && angle < 270f) || (!clockWiseDirection && (angle <= 90f || angle >= 270f))){
+        FlipDirection();
+      }
+
+      //TODO fix angle when direction is flipped
+
+      //Update Cursor
+      aimCursor.transform.rotation = Quaternion.AngleAxis(angle * (-1), transform.right) * startRotation;
+      aimCursor.transform.position = startPosition + aimCursor.transform.forward * cursorRange;
+
+      Debug.Log(angle);
+
 
       //Under swinging height
-      if (Physics.Raycast(transform.position, -Vector3.up, 4.5f, groundLayer)){
-
-        //Tilt up (0 -> 180)
-        if (angle >= 0f && angle <= 180f){
-
-          //Get range from 0 -> 90
-          angle /= 2;
-
-          //Update bow
-          bowBone.transform.rotation = Quaternion.AngleAxis(angle * (-1), transform.right);
-
-          //Degree to radians
-          angle = angle * Mathf.Deg2Rad;
-
-          projectileXSpeed = Mathf.Cos(angle) * projectileSpeed;
-          projectileYSpeed = Mathf.Sin(angle) * (projectileSpeed / 2f); //TODO: Work with projectileSpeed to get it to not go as far
-
-        //Tilt down (360 -> 180)
-        } else {
-
-          //Get range from 0 -> -90
-          angle -= 360;
-          angle /= 2;
-
-          //Update bow
-          bowBone.transform.rotation = Quaternion.AngleAxis(angle * (-1), transform.right);
-
-          //Degree to radians
-          angle = angle * Mathf.Deg2Rad;
-
-          projectileXSpeed = Mathf.Cos(angle) * projectileSpeed;
-          projectileYSpeed = Mathf.Sin(angle) * (projectileSpeed / 2f);
-
-        }
-
-      //In air aiming
-      } else {
-        //TODO slow down time
-
-        //Tilt forward (0 -> 180)
-        if (angle >= 0f && angle <= 180f){
-
-          //Get range from 0 -> 90
-          angle /= 2f;
-          angle -= 90f;
-
-          //Update bow
-          bowBone.transform.rotation = Quaternion.AngleAxis(angle * (-1), transform.right);
-
-          //Degree to radians
-          angle = angle * Mathf.Deg2Rad;
-
-          projectileXSpeed = Mathf.Cos(angle) * projectileSpeed;
-          projectileYSpeed = Mathf.Sin(angle) * (projectileSpeed / 2f);
-
-        //Tilt backward (360 -> 180)
-        } else {
-
-          //Get range from 0 -> -90
-          angle -= 360;
-          angle /= 2;
-          angle -= 90f;
-
-          //Update bow
-          bowBone.transform.rotation = Quaternion.AngleAxis(angle * (-1), transform.right);
-
-          //Degree to radians
-          angle = angle * Mathf.Deg2Rad;
-
-          projectileXSpeed = Mathf.Cos(angle) * projectileSpeed;
-          projectileYSpeed = Mathf.Sin(angle) * (projectileSpeed / 2f);
-
-        }
-
-      }
-    }
-
-
-    /* ResetAim
-
-    */
-    public void ResetAim(){
-
-      //Update bow
-      //bowBone.transform.rotation = Quaternion.AngleAxis(0f, transform.right);
-
-      projectileXSpeed = projectileSpeed;
-      projectileYSpeed = 0f;
+      // if (Physics.Raycast(transform.position, -Vector3.up, 4.5f, groundLayer)){
+      //
+      //   //Tilt up (0 -> 180)
+      //   if (angle >= 0f && angle <= 180f){
+      //
+      //     //Get range from 0 -> 90
+      //     angle /= 2;
+      //
+      //     //Update bow
+      //     bowBone.transform.rotation = Quaternion.AngleAxis(angle * (-1), transform.right);
+      //
+      //     //Degree to radians
+      //     angle = angle * Mathf.Deg2Rad;
+      //
+      //     projectileXSpeed = Mathf.Cos(angle) * projectileSpeed;
+      //     projectileYSpeed = Mathf.Sin(angle) * (projectileSpeed / 2f); //TODO: Work with projectileSpeed to get it to not go as far
+      //
+      //   //Tilt down (360 -> 180)
+      //   } else {
+      //
+      //     //Get range from 0 -> -90
+      //     angle -= 360;
+      //     angle /= 2;
+      //
+      //     //Update bow
+      //     bowBone.transform.rotation = Quaternion.AngleAxis(angle * (-1), transform.right);
+      //
+      //     //Degree to radians
+      //     angle = angle * Mathf.Deg2Rad;
+      //
+      //     projectileXSpeed = Mathf.Cos(angle) * projectileSpeed;
+      //     projectileYSpeed = Mathf.Sin(angle) * (projectileSpeed / 2f);
+      //
+      //   }
+      //
+      // //In air aiming
+      // } else {
+      //   //TODO slow down time
+      //
+      //   //Tilt forward (0 -> 180)
+      //   if (angle >= 0f && angle <= 180f){
+      //
+      //     //Get range from 0 -> 90
+      //     angle /= 2f;
+      //     angle -= 90f;
+      //
+      //     //Update bow
+      //     bowBone.transform.rotation = Quaternion.AngleAxis(angle * (-1), transform.right);
+      //
+      //     //Degree to radians
+      //     angle = angle * Mathf.Deg2Rad;
+      //
+      //     projectileXSpeed = Mathf.Cos(angle) * projectileSpeed;
+      //     projectileYSpeed = Mathf.Sin(angle) * (projectileSpeed / 2f);
+      //
+      //   //Tilt backward (360 -> 180)
+      //   } else {
+      //
+      //     //Get range from 0 -> -90
+      //     angle -= 360;
+      //     angle /= 2;
+      //     angle -= 90f;
+      //
+      //     //Update bow
+      //     bowBone.transform.rotation = Quaternion.AngleAxis(angle * (-1), transform.right);
+      //
+      //     //Degree to radians
+      //     angle = angle * Mathf.Deg2Rad;
+      //
+      //     projectileXSpeed = Mathf.Cos(angle) * projectileSpeed;
+      //     projectileYSpeed = Mathf.Sin(angle) * (projectileSpeed / 2f);
+      //
+      //   }
+      //
+      // }
     }
 
 

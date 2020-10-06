@@ -13,27 +13,21 @@ public partial class EnemyController : MonoBehaviour
   void Start(){
 
     animator = GetComponent<Animator>();
+    movingClockWise = true;
   }
 
 
   /*  UPDATE
     => Update Movement each frame
     => Determine if crossing center area
-
-    //TODO LIST:
-      -Attacking player if in range
-      -Jumping if nessisary
   */
   void Update(){
 
-    //Determine if health is below zero
-    if (health <= 0){
-      animator.SetTrigger("Dead");
-      Destroy(gameObject);
-
-    } else {
+  //Determine if health is below zero
+    if (!attacking && health > 0){
 
       UpdateMovement();
+      CheckAttackRange();
     }
   }
 
@@ -42,7 +36,25 @@ public partial class EnemyController : MonoBehaviour
 
   */
   public void HitDamage(int damage){
-    animator.SetTrigger("DamageTaken");
+
     health -= damage;
+
+    if (health <= 0){
+      animator.SetTrigger("Dead");
+      Invoke("Dying", 1.3f);
+
+    } else {
+      animator.SetTrigger("DamageTaken");
+    }
   }
+
+
+  /* Dying
+
+  */
+  private void Dying(){
+    Destroy(gameObject);
+  }
+
+
 }

@@ -5,6 +5,7 @@ using UnityEngine;
 public partial class PlayerInputController : MonoBehaviour
 {
     private Vector2 moveStick;
+    private Vector2 aimStick;
 
     private enum hand{right, left}
     private hand dominateHand;
@@ -19,7 +20,6 @@ public partial class PlayerInputController : MonoBehaviour
 
     private LineRenderer lineRenderer;
 
-    //TODO: change "attack" action to some other name
     private enum action { water, thorns, yellow, red }
     private action curAction;
 
@@ -118,6 +118,10 @@ public partial class PlayerInputController : MonoBehaviour
       moveStick = OVRInput.Get(OVRInput.RawAxis2D.LThumbstick, OVRInput.Controller.LTouch);
       spirit.GetComponent<GardianController>().UpdateMovement(moveStick.x);
 
+      //Aiming
+      aimStick = OVRInput.Get(OVRInput.RawAxis2D.RThumbstick, OVRInput.Controller.RTouch);
+      spirit.GetComponent<GardianController>().UpdateAim(aimStick);
+
       // Jumping
       if (OVRInput.GetDown(OVRInput.RawButton.A)){
         spirit.GetComponent<GardianController>().Jump();
@@ -144,13 +148,11 @@ public partial class PlayerInputController : MonoBehaviour
         //float angle = rightHand.transform.eulerAngles.z;
         //spirit.GetComponent<GardianController>().AimingProjectile(angle);
 
-      } else {
-        spirit.GetComponent<GardianController>().ResetAim();
       }
 
 
       //Get current action
-      UpdateCurrentAction(OVRInput.Get(OVRInput.RawAxis2D.RThumbstick, OVRInput.Controller.RTouch));
+      //UpdateCurrentAction(OVRInput.Get(OVRInput.RawAxis2D.RThumbstick, OVRInput.Controller.RTouch));
 
 
       // Action Trigger
@@ -212,7 +214,7 @@ public partial class PlayerInputController : MonoBehaviour
       }
 
       //Get current action
-      UpdateCurrentAction(OVRInput.Get(OVRInput.RawAxis2D.LThumbstick, OVRInput.Controller.LTouch));
+      //UpdateCurrentAction(OVRInput.Get(OVRInput.RawAxis2D.LThumbstick, OVRInput.Controller.LTouch));
     }
 
 
