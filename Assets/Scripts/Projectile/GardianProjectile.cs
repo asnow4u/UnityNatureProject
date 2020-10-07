@@ -11,43 +11,46 @@ public class GardianProjectile : MonoBehaviour
     private float xVelocity;
     private float yVelocity;
 
+    private float angleTrajectory;
+    private float angleRate;
+
+    private bool clockWiseDirection;
+
     private Rigidbody rb;
 
     private enum projectile {normal, water, thorn, temp}
     private projectile projectileType;
 
-    // Start is called before the first frame update
+
     void Start()
     {
-      // rb = GetComponent<Rigidbody>();
       GetProjectileType();
 
     }
 
 
     /* Update
-
+      => Adjust movement based on xVelocity
+      => Adjust trajectory angle using Kinematic equation (Vf = Vi + a * t)
+        => Adjust based on direction
+        => Time.deltaTime determins the amount of time since last frame
+      => Check if enemy is hit
+      => Check if ground is hit
     */
     void Update()
     {
-
-        /*TODO: works ok, needs improvements:
-            => Get inital launch angle, will take the place of "rot"
-            => arrow lifts in the front for the first bit
-            => arrow sometimes over rotates
-            => arrow sometimes under rotates
-        */
 
         //Update Movement
         transform.RotateAround(Vector3.zero, new Vector3(0,1,0), xVelocity * Time.deltaTime);
 
         //Update trajectory angle
-        // float angle = Mathf.Atan2(rb.velocity.y, moveXSpeed);
-        // angle *= Mathf.Rad2Deg;
-        //
-        // Quaternion rot = transform.rotation = Quaternion.Euler(0, transform.eulerAngles.y, transform.eulerAngles.z);
-        // transform.rotation = rot * Quaternion.AngleAxis(angle, transform.right);
+        angleTrajectory = angleTrajectory + angleRate * Time.deltaTime;
 
+        if (clockWiseDirection){
+          transform.rotation = Quaternion.Euler((-1) * angleTrajectory, transform.rotation.eulerAngles.y, transform.rotation.eulerAngles.z);
+        } else {
+          transform.rotation = Quaternion.Euler((-1) * angleTrajectory - 180f, transform.rotation.eulerAngles.y, transform.rotation.eulerAngles.z);
+        }
 
         //Check for enemy and deal appropriate damage
         TestEnemyHit();
@@ -135,24 +138,46 @@ public class GardianProjectile : MonoBehaviour
 
     /* SetMoveSpeed
       => Update forces
+        => xVelocity and yVelocity
+        => Determine direction of arrow (clockwise or counter clockwise)
+      => Kinematics to determine the angle rate of change as the arrow flys
+        => Vf = Vi + a * t
+        => Uses the equation to fist find time when arrows yVelocity is 0 (t = (Vf - Vi) / a)
+        => Second time to determine angleRate (a = (Vf - Vi) / t)
       IDEA: Could make default angles (0, 180) be a bit higher for a better firing angle for the arrows trajectory
     */
     public void SetMoveForces(float projectileMoveSpeed, float aimAngle){
 
       float angle = aimAngle * Mathf.Deg2Rad;
+      angleTrajectory = aimAngle;
 
-      if (projectileMoveSpeed < 0){
-        xVelocity = Mathf.Cos(angle) * (-1) * projectileMoveSpeed;
-      } else {
+      //Set Direction and xVelocity
+      if (projectileMoveSpeed > 0f){
+        clockWiseDirection = true;
         xVelocity = Mathf.Cos(angle) * projectileMoveSpeed;
+
+      } else {
+        clockWiseDirection = false;
+        xVelocity = Mathf.Cos(angle) * (-1f) * projectileMoveSpeed;
       }
 
-      Debug.Log("XV: " + xVelocity + " angle: " + angle + " speed: " + projectileMoveSpeed);
-
-
+      //Set yVelocity
       yVelocity = Mathf.Sin(angle) * projectileMoveSpeed;
       rb = GetComponent<Rigidbody>();
       rb.AddForce(Vector3.up * yVelocity, ForceMode.Impulse);
+
+      if (yVelocity > 0f){
+
+        //Kinematics to determine time
+        float time = ((-1) * yVelocity) / Physics.gravity.y;
+
+        //Kinematics to determine angleRate
+        if (clockWiseDirection){
+          angleRate = (0f - angleTrajectory) / time;
+        } else {
+          angleRate = (180f - angleTrajectory) / time;
+        }
+      }
     }
 
 }
