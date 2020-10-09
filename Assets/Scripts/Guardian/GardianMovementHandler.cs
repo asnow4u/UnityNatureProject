@@ -14,6 +14,8 @@ public partial class GardianController : MonoBehaviour
     public float airDrag;
     public float moveSpeed;
 
+    public float terrainAngle;
+
     public float jumpForce;
     public float fallMultiplier;
     public float lowJumpMultiplier;
@@ -37,6 +39,8 @@ public partial class GardianController : MonoBehaviour
 
         //Ground movement
         if (IsGrounded()){
+
+          LevelToGround(); //TODO: when over 10 and in the right direction slide
 
           //Set dragRate based on moveStick
           if ((moveSpeed > 0 && !clockWiseDirection) || (moveSpeed < 0 && clockWiseDirection)){
@@ -116,6 +120,21 @@ public partial class GardianController : MonoBehaviour
     }
 
 
+    /* LevelToGround
+
+    */
+    private void LevelToGround(){
+
+      RaycastHit hit;
+
+      if (Physics.Raycast(transform.position + transform.up, -Vector3.up, out hit, groundDist + 1f,  groundLayer)){
+
+        terrainAngle = Vector3.SignedAngle(Vector3.up, hit.normal, -transform.right);
+        transform.rotation = Quaternion.FromToRotation (transform.up, hit.normal) * transform.rotation;
+      }
+    }
+
+
     /* UpdateForces
       => Update any forces on player
       => Implement gravity force if player is falling
@@ -140,4 +159,9 @@ public partial class GardianController : MonoBehaviour
     }
 
 
+
+    void OnDrawGizmosSelected(){
+      Gizmos.color = Color.green;
+      Gizmos.DrawLine(transform.position + transform.up, transform.position + transform.up -transform.up * groundDist);
+    }
 }

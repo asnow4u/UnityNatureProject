@@ -41,10 +41,19 @@ public partial class GardianController : MonoBehaviour
     }
 
 
+    /*
+      => Update forces
+    */
+    void FixedUpdate(){
+
+      UpdateForces();
+    }
+
+
     /* Update
       => Test GameOver Constraints (Health < 0)
       => Grab input from user
-      => Update forces
+
       => Calculate total movement of player
     */
     void Update()
@@ -55,20 +64,15 @@ public partial class GardianController : MonoBehaviour
         Debug.Log("Dead!");
       }
 
-      //Check if swinging
-      // if (animator.GetCurrentAnimatorStateInfo(0).IsName("Swing")){
-      //   UpdateSwing();
-      // }
 
-      UpdateForces();
-      UpdateProgression();
+      //UpdateProgression();
 
       //Update isGrounded bool with animator
-      if (IsGrounded()){
-        animator.SetBool("isGrounded", true);
-      } else {
-        animator.SetBool("isGrounded", false);
-      }
+      // if (IsGrounded()){
+      //   animator.SetBool("isGrounded", true);
+      // } else {
+      //   animator.SetBool("isGrounded", false);
+      // }
 
       //TEST
       Debug.Log("Grounded: " + IsGrounded());
@@ -100,7 +104,7 @@ public partial class GardianController : MonoBehaviour
       => Check that the player is on the ground
     */
     public bool IsGrounded(){
-      return Physics.Raycast(transform.position, -Vector3.up, groundDist, groundLayer);
+      return Physics.Raycast(transform.position + transform.up, -transform.up, groundDist, groundLayer);
     }
 
 
@@ -132,16 +136,6 @@ public partial class GardianController : MonoBehaviour
     //     health -= 10;
     //
     //   }
-    // }
-
-
-    // void OnDrawGizmosSelected(){
-      // Gizmos.color = Color.red;
-      // Gizmos.DrawWireSphere(transform.position + transform.forward * 2.5f + transform.up * 2, attackRadius);
-      // Gizmos.matrix = Matrix4x4.TRS(transform.position + transform.forward * 5f + transform.up * 9f + transform.right,
-      //                               Quaternion.identity,
-      //                               new Vector3(7, 4, 1));
-      // Gizmos.DrawWireCube(Vector3.zero, Vector3.one);
     // }
 
 }

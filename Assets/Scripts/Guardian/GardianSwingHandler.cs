@@ -5,23 +5,25 @@ using UnityEngine;
 public partial class GardianController : MonoBehaviour
 {
 
-    private GameObject[] swingTreePoints; //TODO: will grab from enviroment. Enviroment to update array when it changes, or might grab array from enviroment
+    private GameObject[] swingTreePoints;
     private GameObject curSwingPoint;
     // public float swingSpeed;
     public float swingRange;
     private float swingAngle;
 
 
-
+    //IDEA: When above swing point dont grapple, instead swing
+    //TODO: points are static and will adjust based on terrain height
     /* UseSwingItem
 
     */
     public void UseSwingItem(){
 
+      swingTreePoints = GameObject.FindGameObjectsWithTag("SwingPoint"); //TODO: grab from enviroment instead?
+
       foreach (GameObject swingPoint in swingTreePoints){
 
         float dist = Vector3.Distance(transform.position, swingPoint.transform.position);
-        // Debug.Log("dist: " + dist);
 
         if (dist <= swingRange && IsFacingTreeDirection(swingPoint)){
 
@@ -33,7 +35,7 @@ public partial class GardianController : MonoBehaviour
 
           moveSpeed = maxMoveSpeed * Mathf.Cos(swingAngle);
           moveSpeed = clockWiseDirection ? moveSpeed : (-1)*moveSpeed;
-          
+
           rb.AddForce(Vector3.up * maxMoveSpeed * Mathf.Sin(swingAngle) * 80f, ForceMode.Impulse); // torgue force
 
         }
@@ -46,37 +48,90 @@ public partial class GardianController : MonoBehaviour
 
 
     /* IsFacingTreeDirection
-      => Determine if player is facing towards the swing tree
-      => Based on the position of the swingPoint, determine the quadrent the tree is in
-      => Based on quadrent and player direction determine if in sight
+
     */
     private bool IsFacingTreeDirection(GameObject swingPoint){
 
-      //Top half
-      if (swingPoint.transform.position.z >= 0 ){
+      float xPos = swingPoint.transform.position.x;
 
-        //Counter Clockwise
-        if (!clockWiseDirection && transform.position.x >= swingPoint.transform.position.x){
-          return true;
-        }
+      switch (swingPoint.transform.position.z){
+        //Top
+        case 80:  if (clockWiseDirection){
+                    if (xPos >= transform.position.x){
+                      return true;
+                    }
 
-        //Clockwise
-        if (clockWiseDirection && transform.position.x <= swingPoint.transform.position.x){
-          return true;
-        }
+                  } else {
+                    if (xPos < transform.position.x){
+                      return true;
+                    }
+                  }
+                  break;
 
-      //Bottom half
-      } else {
+        //Top half
+        case 40:  if (clockWiseDirection){
 
-        //Counter Clockwise
-        if (!clockWiseDirection && transform.position.x <= swingPoint.transform.position.x){
-          return true;
-        }
+                    //Right
+                    if (xPos > 0 && xPos >= transform.position.x){
+                      return true;
 
-        //ClockWise
-        if (clockWiseDirection && transform.position.x >= swingPoint.transform.position.x){
-          return true;
-        }
+                    //Left
+                  } else if (xPos < 0 && xPos >= transform.position.x){
+                      return true;
+                    }
+
+                  //Counter clockwise
+                  } else {
+
+                    //Right
+                    if (xPos > 0 && xPos < transform.position.x){
+                      return true;
+
+                    //Left
+                  } else if (xPos < 0 && xPos < transform.position.x){
+                      return true;
+                    }
+                  }
+                  break;
+
+        //Bottom half
+        case -40: if (clockWiseDirection){
+
+                    //Right
+                    if (xPos > 0 && xPos <= transform.position.x){
+                      return true;
+
+                    //Left
+                  } else if (xPos < 0 && xPos <= transform.position.x){
+                      return true;
+                    }
+
+                  //Counter clockwise
+                  } else {
+
+                    //Right
+                    if (xPos > 0 && xPos > transform.position.x){
+                      return true;
+
+                    //Left
+                  } else if (xPos < 0 && xPos > transform.position.x){
+                      return true;
+                    }
+                  }
+                  break;
+
+        //Bottom
+        case -80: if (clockWiseDirection){
+                    if (xPos <= transform.position.x){
+                      return true;
+                    }
+
+                  } else {
+                    if (xPos > transform.position.x){
+                      return true;
+                    }
+                  }
+                  break;
       }
 
       return false;

@@ -51,10 +51,10 @@ public partial class PlayerInputController : MonoBehaviour
     }
 
 
-    /* Update
+    /* FixedUpdate
 
     */
-    void Update(){
+    void FixedUpdate(){
 
       ControllerInputs();
     }

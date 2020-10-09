@@ -49,10 +49,10 @@ public partial class GardianController : MonoBehaviour
 
           if (clockWiseDirection){
             spawnedWaterProjectile.GetComponent<GardianProjectile>().SetMoveForces(projectileSpeed, projectileAngle);
-            spawnedWaterProjectile.transform.Rotate(Mathf.Abs(projectileAngle - 360), 90f, 0f);
+            spawnedWaterProjectile.transform.Rotate(Mathf.Abs(projectileAngle - 360), transform.position.z >= 0 ? 90f : -90f, 0f);
           } else {
             spawnedWaterProjectile.GetComponent<GardianProjectile>().SetMoveForces((-1) * projectileSpeed, projectileAngle);
-            spawnedWaterProjectile.transform.Rotate(projectileAngle, 90f, 0f);
+            spawnedWaterProjectile.transform.Rotate(projectileAngle, transform.position.z >= 0 ? 90f : -90f, 0f);
           }
 
           break;
