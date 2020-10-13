@@ -29,6 +29,7 @@ public partial class GardianController : MonoBehaviour
       distanceTraveled = 0.0f;
       preLocation = transform.position;
       clockWiseDirection = true;
+      sliding = false;
 
       animator = GetComponent<Animator>();
       rb = GetComponent<Rigidbody>();

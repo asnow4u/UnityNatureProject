@@ -14,12 +14,14 @@ public partial class GardianController : MonoBehaviour
     public float airDrag;
     public float moveSpeed;
 
+    public bool sliding;
+    public float slidingAcceleration;
     public float terrainAngle;
 
     public float jumpForce;
     public float fallMultiplier;
     public float lowJumpMultiplier;
-    private bool clockWiseDirection;
+    public bool clockWiseDirection;
 
 
     /* UpdateMovement
@@ -30,7 +32,7 @@ public partial class GardianController : MonoBehaviour
     public void UpdateMovement(float moveStick){
 
       //Check for direction change
-      if ((moveStick > 0f && !clockWiseDirection) || (moveStick < 0f && clockWiseDirection)){
+      if ( !sliding && ((moveStick > 0f && !clockWiseDirection) || (moveStick < 0f && clockWiseDirection))){
         FlipDirection();
       }
 
@@ -40,27 +42,68 @@ public partial class GardianController : MonoBehaviour
         //Ground movement
         if (IsGrounded()){
 
-          LevelToGround(); //TODO: when over 10 and in the right direction slide
+          LevelToGround();
 
-          //Set dragRate based on moveStick
-          if ((moveSpeed > 0 && !clockWiseDirection) || (moveSpeed < 0 && clockWiseDirection)){
-            dragRate = drag;
-            //TODO: Set animator for slide stop animation
+          //Sliding
+          if (sliding){
 
+            //Determine if sliding is done
+            if (terrainAngle > -5f){ //TODO: Test angle
+              sliding = false;
+              //Set animator
+            }
+
+            //TODO: force to keep player from bounceing. try normal force
+            // rb.AddForce(Vector3.up * Physics.gravity.y * 5f, ForceMode.Impulse);
+            moveSpeed += (clockWiseDirection ? slidingAcceleration : -slidingAcceleration) * Mathf.Sin(Mathf.Deg2Rad * -terrainAngle);
+
+
+          //Run/Walk
           } else {
-            dragRate = 1f;
+
+            //Determine the angle when sliding happens
+            if (terrainAngle <= -10f){
+              sliding = true;
+              //Set animator
+
+            }
+
+            //Determine when hill is to difficult to climb
+            //TODO: apply Terrainangle into the equation. We want the character to slow when climbing a big cliff. if movespeed switchs signs flip direction. This should trigger the slide down.
+            if (terrainAngle >= 40f){ //TODO: test angle
+              //dragRate *= Mathf.Sin(Mathf.Deg2Rad * -terrainAngle) * 2f;
+
+              moveSpeed *= Mathf.Cos(Mathf.Deg2Rad * terrainAngle);
+
+              if (moveSpeed <= 0.01f && clockWiseDirection || moveSpeed >= 0.01f && !clockWiseDirection){
+                FlipDirection();
+                sliding = true;
+              }
+
+            //Regular movement
+            } else {
+
+              //Set dragRate based on moveStick
+              if ((moveSpeed > 0 && !clockWiseDirection) || (moveSpeed < 0 && clockWiseDirection)){
+                dragRate = drag;
+              } else {
+                dragRate = 1f;
+              }
+
+              //Slow down to a stop
+              if (moveStick == 0f){
+                moveSpeed *= 0.95f;
+
+              } else {
+
+                moveSpeed += accelerationRate * dragRate * moveStick * Time.deltaTime;
+              }
+
+              //Set animation value
+              animator.SetFloat("moveStick", Mathf.Abs(moveStick));
+            }
           }
 
-          //Slow down to a stop
-          if (moveStick == 0f){
-            moveSpeed *= 0.95f;
-
-          } else {
-            moveSpeed += accelerationRate * dragRate * moveStick * Time.deltaTime;
-          }
-
-          //Set animation value
-          animator.SetFloat("moveStick", Mathf.Abs(moveStick));
 
         //Air movement
         } else {
@@ -130,6 +173,7 @@ public partial class GardianController : MonoBehaviour
       if (Physics.Raycast(transform.position + transform.up, -Vector3.up, out hit, groundDist + 1f,  groundLayer)){
 
         terrainAngle = Vector3.SignedAngle(Vector3.up, hit.normal, -transform.right);
+        Debug.Log(terrainAngle);
         transform.rotation = Quaternion.FromToRotation (transform.up, hit.normal) * transform.rotation;
       }
     }
@@ -140,6 +184,7 @@ public partial class GardianController : MonoBehaviour
       => Implement gravity force if player is falling
     */
     //TODO: Either here or in a new function, apply small forces to nudge the player back to the center if they are off.
+    //TODO: force to keep player from bounceing. try normal force
     private void UpdateForces(){
 
       //Swing Force
