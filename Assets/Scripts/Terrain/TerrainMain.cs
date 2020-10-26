@@ -98,47 +98,47 @@ public partial class TerrainMain : MonoBehaviour
 
         DetermineVerticeGroups();
 
-        // // Testing Left
-        // for(int i=0; i<4; i++){
-        //   vertices[terrainTiles[1].farRight[i]].z = 0.06f;
-        // }
-        // for(int i=0; i<4; i++){
-        //   vertices[terrainTiles[1].midRight[i]].z = 0.06f;
-        // }
-        // for(int i=0; i<4; i++){
-        //   vertices[terrainTiles[1].midLeft[i]].z = 0.06f;
-        // }
-        // for(int i=0; i<4; i++){
-        //   vertices[terrainTiles[1].farLeft[i]].z = 0.06f;
-        // }
+        // Testing Left
+        for(int i=0; i<4; i++){
+          vertices[terrainTiles[1].farRight[i]].z = 0.06f;
+        }
+        for(int i=0; i<4; i++){
+          vertices[terrainTiles[1].midRight[i]].z = 0.06f;
+        }
+        for(int i=0; i<4; i++){
+          vertices[terrainTiles[1].midLeft[i]].z = 0.06f;
+        }
+        for(int i=0; i<4; i++){
+          vertices[terrainTiles[1].farLeft[i]].z = 0.06f;
+        }
 
         //Testing Middle
         for(int i=0; i<4; i++){
-          vertices[terrainTiles[1].farRight[i]].z = 0.2f;
+          vertices[terrainTiles[4].farRight[i]].z = 0.1f;
         }
         for(int i=0; i<4; i++){
-          vertices[terrainTiles[1].midRight[i]].z = 0.2f;
+          vertices[terrainTiles[4].midRight[i]].z = 0.1f;
         }
         for(int i=0; i<4; i++){
-          vertices[terrainTiles[1].midLeft[i]].z = 0.2f;
+          vertices[terrainTiles[4].midLeft[i]].z = 0.1f;
         }
         for(int i=0; i<4; i++){
-          vertices[terrainTiles[1].farLeft[i]].z = 0.2f;
+          vertices[terrainTiles[4].farLeft[i]].z = 0.1f;
         }
 
-        //Testing Right
-        // for(int i=0; i<4; i++){
-        //   vertices[terrainTiles[6].farRight[i]].z = 0.14f;
-        // }
-        // for(int i=0; i<4; i++){
-        //   vertices[terrainTiles[6].midRight[i]].z = 0.14f;
-        // }
-        // for(int i=0; i<4; i++){
-        //   vertices[terrainTiles[6].midLeft[i]].z = 0.14f;
-        // }
-        // for(int i=0; i<4; i++){
-        //   vertices[terrainTiles[6].farLeft[i]].z = 0.14f;
-        // }
+        // //Testing Right
+        for(int i=0; i<4; i++){
+          vertices[terrainTiles[3].farRight[i]].z = 0.1f;
+        }
+        for(int i=0; i<4; i++){
+          vertices[terrainTiles[3].midRight[i]].z = 0.1f;
+        }
+        for(int i=0; i<4; i++){
+          vertices[terrainTiles[3].midLeft[i]].z = 0.1f;
+        }
+        for(int i=0; i<4; i++){
+          vertices[terrainTiles[3].farLeft[i]].z = 0.1f;
+        }
 
         terrainTiles[0].isExplored = true;
         terrainTiles[1].isExplored = true;

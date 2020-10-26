@@ -22,10 +22,7 @@ public partial class GardianController : MonoBehaviour
     */
     void Start()
     {
-      // health = 100;
-      // speed = 10.0f;
-      // jumpForce = 8.0f;
-      // fallForce = 2.0f;
+
       distanceTraveled = 0.0f;
       preLocation = transform.position;
       clockWiseDirection = true;

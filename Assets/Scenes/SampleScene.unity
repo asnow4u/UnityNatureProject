@@ -792,7 +792,7 @@ PrefabInstance:
     - target: {fileID: -4216859302048453862, guid: 74ade2a32283be941b4cf8ef8940186d,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.58
+      value: 28
       objectReference: {fileID: 0}
     - target: {fileID: -4216859302048453862, guid: 74ade2a32283be941b4cf8ef8940186d,
         type: 3}
@@ -2619,7 +2619,9 @@ MonoBehaviour:
   moveSpeed: 0
   sliding: 0
   slidingAcceleration: 0.01
+  slidingForce: 20
   terrainAngle: 0
+  steepAngle: 20
   jumpForce: 10
   fallMultiplier: 3
   lowJumpMultiplier: 2
