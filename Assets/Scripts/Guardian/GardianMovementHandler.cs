@@ -20,6 +20,7 @@ public partial class GardianController : MonoBehaviour
     public float terrainAngle;
     public float steepAngle;
 
+    public bool jumping;
     public float jumpForce;
     public float fallMultiplier;
     public float lowJumpMultiplier;
@@ -59,7 +60,6 @@ public partial class GardianController : MonoBehaviour
 
             } else if (terrainAngle > steepAngle){                                                                                                    //Check for steepAngle
               dragRate = -1f - Mathf.Sin(Mathf.Deg2Rad * terrainAngle);
-              Debug.Log("dragrate: " + dragRate);
 
               if (moveSpeed <= 0.1f && clockWiseDirection || moveSpeed >= -0.1f && !clockWiseDirection){
                 FlipDirection();
@@ -97,7 +97,8 @@ public partial class GardianController : MonoBehaviour
 
       transform.RotateAround(Vector3.zero, new Vector3(0,1,0), moveSpeed);
 
-      if (sliding){
+      if (sliding && !jumping){
+        Debug.Log("CorrectSlidingYPos Called");
         CorrectSlidingYPos();
       }
 
@@ -105,24 +106,25 @@ public partial class GardianController : MonoBehaviour
 
 
     /* UpdateJump
-
+      => Check that character is on the ground
+      => Set jumping bool to true (turns to false when character starts to fall)
+      => Turns sliding off if character was sliding
+      => Apply jumping force in the upward direction
+      //TODO: rotate character to no longer be flush with the terrain rather at 0 degrees
     */
     public void Jump(){
 
-      if (IsGrounded()){
+      if (IsGrounded() && !jumping){
+        jumping = true;
         // animator.SetTrigger("jump");
         // TODO: jump animation will need to be short for a instantaneous reaction to the players input. mostly involving the upper body as to not interupt movement from the legs.
 
         if (sliding) {
-          //TODO: update force that gets applied
-          rb.AddForce(Vector3.up * (jumpForce + slidingForce), ForceMode.Impulse);
           sliding = false;
-          Debug.Log("slideJump");
-
-        } else {
-
-          rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         }
+
+        Debug.Log("Force Y: " + rb.velocity.y);
+        rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
       }
     }
 
@@ -180,8 +182,6 @@ public partial class GardianController : MonoBehaviour
 
       //Raycast down to ground
       if (Physics.Raycast(transform.position, -Vector3.up, out hit, groundDist + 1f,  groundLayer)){
-        Debug.Log("DistanceToGround: " + hit.distance);
-
         transform.position = new Vector3(transform.position.x, transform.position.y - hit.distance, transform.position.z);
       }
     }

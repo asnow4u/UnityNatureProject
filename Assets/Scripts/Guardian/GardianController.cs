@@ -72,6 +72,12 @@ public partial class GardianController : MonoBehaviour
       //   animator.SetBool("isGrounded", false);
       // }
 
+      //Determine if character is falling
+      if (jumping && (Mathf.Round(rb.velocity.y * 100f) / 100f) < 0){
+        Debug.Log("TEST: " + (Mathf.Round(rb.velocity.y * 100f) / 100f));
+        jumping = false;
+      }
+
       //TEST
       Debug.Log("Grounded: " + IsGrounded());
 
