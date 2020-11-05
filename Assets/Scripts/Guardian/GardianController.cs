@@ -74,7 +74,6 @@ public partial class GardianController : MonoBehaviour
 
       //Determine if character is falling
       if (jumping && (Mathf.Round(rb.velocity.y * 100f) / 100f) < 0){
-        Debug.Log("TEST: " + (Mathf.Round(rb.velocity.y * 100f) / 100f));
         jumping = false;
       }
 

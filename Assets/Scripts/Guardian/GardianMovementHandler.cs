@@ -20,6 +20,13 @@ public partial class GardianController : MonoBehaviour
     public float terrainAngle;
     public float steepAngle;
 
+    public bool dashing;
+    public bool dashCoolDown;
+    public float dashSpeed;
+    public float maxDashSpeed;
+    public float dashTime;
+    public float dashUpwardForce;
+
     public bool jumping;
     public float jumpForce;
     public float fallMultiplier;
@@ -41,71 +48,98 @@ public partial class GardianController : MonoBehaviour
     */
     public void UpdateMovement(float moveStick){
 
-      if ( !sliding && ((moveStick > 0f && !clockWiseDirection) || (moveStick < 0f && clockWiseDirection))){                                          //Check for direction change
+      //Check for direction change
+      if ((moveStick > 0f && !clockWiseDirection) || (moveStick < 0f && clockWiseDirection)){
         FlipDirection();
       }
 
-      if (curSwingPoint == null){                                                                                                                     //Check if swinging
+      //Ground movement
+      if (IsGrounded()){
+        UpdateGroundMovement(moveStick);
 
-        if (IsGrounded()){                                                                                                                            //Ground movement
-          LevelToGround();
+      //Air movement
+      } else {
+        UpdateAirMovement(moveStick);
+      }
 
-          if (sliding){                                                                                                                               //State = Sliding
-            moveSpeed += (clockWiseDirection ? slidingAcceleration : -slidingAcceleration) * Mathf.Sin(Mathf.Deg2Rad * -terrainAngle);
+      //Dash movement
+      if (dashing){
+        moveSpeed = dashSpeed;
 
-          } else {                                                                                                                                    //State = walk/run
+      } else {
+        if ((moveSpeed > maxMoveSpeed && clockWiseDirection) || (moveSpeed < -maxMoveSpeed && !clockWiseDirection)){
 
-            if ((moveSpeed > 0 && !clockWiseDirection) || (moveSpeed < 0 && clockWiseDirection)){                                                     //Check if moving the oposite direction to apply more speed
-              dragRate = drag;
-
-            } else if (terrainAngle > steepAngle){                                                                                                    //Check for steepAngle
-              dragRate = -1f - Mathf.Sin(Mathf.Deg2Rad * terrainAngle);
-
-              if (moveSpeed <= 0.1f && clockWiseDirection || moveSpeed >= -0.1f && !clockWiseDirection){
-                FlipDirection();
-                sliding = true;
-              }
-
-            } else {
-              dragRate = 1f;
-            }
-
-            if (moveStick == 0f){                                                                                                                     //Slow down to a stop
-              moveSpeed *= 0.95f;
-            } else {
-              moveSpeed += accelerationRate * dragRate * moveStick * Time.deltaTime;
-            }
-
-            animator.SetFloat("moveStick", Mathf.Abs(moveStick));                                                                                    //Set animation value
-          }
-
-        } else {                                                                                                                                     //State = Air movement
-
-          if ((moveSpeed > 0 && !clockWiseDirection) || (moveSpeed < 0 && clockWiseDirection)){                                                      //Set dragRate based on moveStick
-            dragRate = airDrag;
-            moveSpeed += accelerationRate * dragRate * moveStick * Time.deltaTime;
-
-          } else {
-            dragRate = 1f;
-          }
+          moveSpeed = clockWiseDirection ? maxMoveSpeed : (-1)*maxMoveSpeed;
         }
       }
 
-      if (Mathf.Abs(moveSpeed) > maxMoveSpeed){                                                                                                       //Check if above maxspeed
-        moveSpeed = clockWiseDirection ? maxMoveSpeed : (-1)*maxMoveSpeed;
-      }
-
-      transform.RotateAround(Vector3.zero, new Vector3(0,1,0), moveSpeed);
-
       if (sliding && !jumping){
-        Debug.Log("CorrectSlidingYPos Called");
         CorrectSlidingYPos();
       }
 
+      //Apply moveSpeed
+      transform.RotateAround(Vector3.zero, new Vector3(0,1,0), moveSpeed);
     }
 
 
-    /* UpdateJump
+    /* UpdateGroundMovement
+
+    */
+    private void UpdateGroundMovement(float moveStick){
+
+      if (!dashing){
+        LevelToGround();
+      }
+
+      if (sliding){                                                                                                                               //State = Sliding
+        moveSpeed += (clockWiseDirection ? slidingAcceleration : -slidingAcceleration) * Mathf.Sin(Mathf.Deg2Rad * -terrainAngle);
+
+      } else {                                                                                                                                    //State = walk/run
+
+        if ((moveSpeed > 0 && !clockWiseDirection) || (moveSpeed < 0 && clockWiseDirection)){                                                     //Check if moving the oposite direction to apply more speed
+          dragRate = drag;
+
+        } else if (terrainAngle > steepAngle && !dashing){                                                                                                    //Check for steepAngle
+          dragRate = -1f - Mathf.Sin(Mathf.Deg2Rad * terrainAngle);
+
+          if (moveSpeed <= 0.1f && clockWiseDirection || moveSpeed >= -0.1f && !clockWiseDirection){
+            FlipDirection();
+            sliding = true;
+          }
+
+        } else {
+          dragRate = 1f;
+        }
+
+        if (moveStick == 0f){                                                                                                                     //Slow down to a stop
+          moveSpeed *= 0.95f;
+        } else {
+          moveSpeed += accelerationRate * dragRate * moveStick * Time.deltaTime;
+        }
+
+        animator.SetFloat("moveStick", Mathf.Abs(moveStick));                                                                                    //Set animation value
+      }
+    }
+
+
+    /* UpdateAirMovement
+
+    */
+    private void UpdateAirMovement(float moveStick){
+
+      transform.rotation = Quaternion.FromToRotation (transform.up, Vector3.up) * transform.rotation;
+
+      if ((moveSpeed > 0 && !clockWiseDirection) || (moveSpeed < 0 && clockWiseDirection)){                                                      //Set dragRate based on moveStick
+        dragRate = airDrag;
+        moveSpeed += accelerationRate * dragRate * moveStick * Time.deltaTime;
+
+      } else {
+        dragRate = 1f;
+      }
+    }
+
+
+    /* Jump
       => Check that character is on the ground
       => Set jumping bool to true (turns to false when character starts to fall)
       => Turns sliding off if character was sliding
@@ -123,9 +157,55 @@ public partial class GardianController : MonoBehaviour
           sliding = false;
         }
 
-        Debug.Log("Force Y: " + rb.velocity.y);
         rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
       }
+    }
+
+
+    /* Dash
+
+    */
+    public void Dash(Vector2 aimStick){
+
+      if (!dashCoolDown){ //TODO: change to dashAction (cooldown is finished)
+
+        float angle = Mathf.Atan2(aimStick.y, aimStick.x) * Mathf.Rad2Deg;
+
+        if (angle < 0){
+          angle += 360f;
+
+        } else if (angle == 0 && !clockWiseDirection){
+          angle = 180f;
+        }
+
+        dashCoolDown = true;
+        dashing = true;
+        sliding = false;
+
+        //Angle from projectileAngle
+        angle = Mathf.Deg2Rad * angle;
+
+        dashSpeed = Mathf.Cos(angle) * maxDashSpeed;
+
+        float upwardForce = Mathf.Sin(angle) * maxDashSpeed * dashUpwardForce;
+
+        rb.AddForce(Vector3.up * upwardForce, ForceMode.Impulse);
+
+        Invoke("ResetDashCoolDown", dashTime);
+      }
+
+      return;
+    }
+
+
+    /* UpdateDash
+
+    */
+    private void ResetDashCoolDown(){
+      dashCoolDown = false;
+
+      dashing = false; //TODO: should be removed in UpdateMovement when it slows down enough
+
     }
 
 
@@ -135,8 +215,10 @@ public partial class GardianController : MonoBehaviour
     */
     public void FlipDirection(){
 
+      if (!dashing && !sliding){
         clockWiseDirection = !clockWiseDirection;
         transform.Rotate(0f, 180f, 0f);
+      }
     }
 
 
@@ -152,7 +234,7 @@ public partial class GardianController : MonoBehaviour
       if (Physics.Raycast(transform.position + transform.up, -Vector3.up, out hit, groundDist + 1f,  groundLayer)){
 
         terrainAngle = Vector3.SignedAngle(Vector3.up, hit.normal, -transform.right);
-        Debug.Log(terrainAngle);
+
         transform.rotation = Quaternion.FromToRotation (transform.up, hit.normal) * transform.rotation;
 
         //Determine if sliding is done
@@ -210,7 +292,6 @@ public partial class GardianController : MonoBehaviour
         }
       }
     }
-
 
 
     void OnDrawGizmosSelected(){

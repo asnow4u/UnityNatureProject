@@ -18,7 +18,7 @@ public partial class GardianController : MonoBehaviour
 
     public float cursorRange;
     public float projectileSpeed;
-    private float projectileAngle;
+    public float projectileAngle;
 
     private enum action {water, thorn, yellow, red}
     private action curAction;

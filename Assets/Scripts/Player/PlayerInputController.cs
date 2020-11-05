@@ -142,7 +142,8 @@ public partial class PlayerInputController : MonoBehaviour
 
       // Item
       if (OVRInput.GetDown(OVRInput.RawButton.LIndexTrigger)){
-        spirit.GetComponent<GardianController>().UseItem();
+        // spirit.GetComponent<GardianController>().UseItem();
+        spirit.GetComponent<GardianController>().Dash(aimStick);
       }
 
       // Dodge
