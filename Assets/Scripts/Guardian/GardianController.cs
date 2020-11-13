@@ -78,7 +78,7 @@ public partial class GardianController : MonoBehaviour
       }
 
       //TEST
-      Debug.Log("Grounded: " + IsGrounded());
+      // Debug.Log("Grounded: " + IsGrounded());
 
     }
 

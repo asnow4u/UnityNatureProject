@@ -7,14 +7,13 @@ public partial class TerrainMain : MonoBehaviour
     public Camera cam;
     private Mesh mesh;
     private Vector3[] vertices;
+    private int[] triangles;
 
     private int curPlayerQuad;
     private bool updateTerrain;
 
-    private float maxTerrainHeight;
-    private float minTerrainHeight;
-
-    private enum TerrainType {Uphill, Downhill, Flat, Pitfall, Wall, Cliff};
+    public float maxTerrainHeight;
+    public float minTerrainHeight;
 
     private struct TerrainTile {
         public int height;
@@ -24,7 +23,8 @@ public partial class TerrainMain : MonoBehaviour
         public List<int> midRight;
         public List<int> midLeft;
         public List<int> farLeft;
-        public TerrainType type;
+        public int[] addedVerts;
+        public int[] addedTriangles;
         public Enviroment enviroment;
     }
     private TerrainTile[] terrainTiles;
@@ -67,7 +67,8 @@ public partial class TerrainMain : MonoBehaviour
           terrainTiles[i].midRight = new List<int>();
           terrainTiles[i].midLeft = new List<int>();
           terrainTiles[i].farLeft = new List<int>();
-          terrainTiles[i].type = TerrainType.Flat;
+          terrainTiles[i].addedVerts = new int[] {-1, -1};
+          terrainTiles[i].addedTriangles = new int[] {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
           terrainTiles[i].enviroment.smallTrees = new List<GameObject>();
           terrainTiles[i].enviroment.rocks = new List<GameObject>();
 
@@ -76,6 +77,7 @@ public partial class TerrainMain : MonoBehaviour
         //Grab vertices from mesh
         mesh = GetComponent<MeshFilter>().mesh;
         vertices = mesh.vertices;
+        triangles = mesh.triangles;
 
         //Determine which vertices go to which quadrent
         for (int i=0; i<vertices.Length; i++){
@@ -85,8 +87,6 @@ public partial class TerrainMain : MonoBehaviour
 
           // Check that vertice is part of the path
           if (vertices[i].z > 0.01){
-
-
 
             // Get the center point between the center and the vertex
             dist = Mathf.Sqrt((dist*dist)/2);
@@ -99,55 +99,55 @@ public partial class TerrainMain : MonoBehaviour
         DetermineVerticeGroups();
 
         // Testing Left
-        for(int i=0; i<4; i++){
-          vertices[terrainTiles[1].farRight[i]].z = 0.06f;
-        }
-        for(int i=0; i<4; i++){
-          vertices[terrainTiles[1].midRight[i]].z = 0.06f;
-        }
-        for(int i=0; i<4; i++){
-          vertices[terrainTiles[1].midLeft[i]].z = 0.06f;
-        }
-        for(int i=0; i<4; i++){
-          vertices[terrainTiles[1].farLeft[i]].z = 0.06f;
-        }
+        // for(int i=0; i<4; i++){
+        //   vertices[terrainTiles[1].farRight[i]].z = 0.06f;
+        // }
+        // for(int i=0; i<4; i++){
+        //   vertices[terrainTiles[1].midRight[i]].z = 0.06f;
+        // }
+        // for(int i=0; i<4; i++){
+        //   vertices[terrainTiles[1].midLeft[i]].z = 0.06f;
+        // }
+        // for(int i=0; i<4; i++){
+        //   vertices[terrainTiles[1].farLeft[i]].z = 0.06f;
+        // }
+        //
+        // //Testing Middle
+        // for(int i=0; i<4; i++){
+        //   vertices[terrainTiles[4].farRight[i]].z = 0.1f;
+        // }
+        // for(int i=0; i<4; i++){
+        //   vertices[terrainTiles[4].midRight[i]].z = 0.1f;
+        // }
+        // for(int i=0; i<4; i++){
+        //   vertices[terrainTiles[4].midLeft[i]].z = 0.1f;
+        // }
+        // for(int i=0; i<4; i++){
+        //   vertices[terrainTiles[4].farLeft[i]].z = 0.1f;
+        // }
+        //
+        // // //Testing Right
+        // for(int i=0; i<4; i++){
+        //   vertices[terrainTiles[3].farRight[i]].z = 0.1f;
+        // }
+        // for(int i=0; i<4; i++){
+        //   vertices[terrainTiles[3].midRight[i]].z = 0.1f;
+        // }
+        // for(int i=0; i<4; i++){
+        //   vertices[terrainTiles[3].midLeft[i]].z = 0.1f;
+        // }
+        // for(int i=0; i<4; i++){
+        //   vertices[terrainTiles[3].farLeft[i]].z = 0.1f;
+        // }
 
-        //Testing Middle
-        for(int i=0; i<4; i++){
-          vertices[terrainTiles[4].farRight[i]].z = 0.1f;
-        }
-        for(int i=0; i<4; i++){
-          vertices[terrainTiles[4].midRight[i]].z = 0.1f;
-        }
-        for(int i=0; i<4; i++){
-          vertices[terrainTiles[4].midLeft[i]].z = 0.1f;
-        }
-        for(int i=0; i<4; i++){
-          vertices[terrainTiles[4].farLeft[i]].z = 0.1f;
-        }
-
-        // //Testing Right
-        for(int i=0; i<4; i++){
-          vertices[terrainTiles[3].farRight[i]].z = 0.1f;
-        }
-        for(int i=0; i<4; i++){
-          vertices[terrainTiles[3].midRight[i]].z = 0.1f;
-        }
-        for(int i=0; i<4; i++){
-          vertices[terrainTiles[3].midLeft[i]].z = 0.1f;
-        }
-        for(int i=0; i<4; i++){
-          vertices[terrainTiles[3].farLeft[i]].z = 0.1f;
-        }
-
-        terrainTiles[0].isExplored = true;
-        terrainTiles[1].isExplored = true;
-        terrainTiles[2].isExplored = true;
-        terrainTiles[3].isExplored = true;
-        terrainTiles[4].isExplored = true;
-        terrainTiles[5].isExplored = true;
-        terrainTiles[6].isExplored = true;
-        terrainTiles[7].isExplored = true;
+        // terrainTiles[0].isExplored = true;
+        // terrainTiles[1].isExplored = true;
+        // terrainTiles[2].isExplored = true;
+        // terrainTiles[3].isExplored = true;
+        // terrainTiles[4].isExplored = true;
+        // terrainTiles[5].isExplored = true;
+        // terrainTiles[6].isExplored = true;
+        // terrainTiles[7].isExplored = true;
 
     }
 
@@ -160,24 +160,13 @@ public partial class TerrainMain : MonoBehaviour
     {
 
       //Update player explored quadrents
-      if (player != null){
-
-        curPlayerQuad = GetCurrentQuadrent(player.transform.position);
-
-        if (curPlayerQuad >= 0){
-          terrainTiles[curPlayerQuad].isExplored = true;
-        }
-
-      } else {
-        player = GameObject.FindGameObjectWithTag("Player");
-      }
+      UpdateExoloredQuadrents();
 
       //Loop through each terrain quad
       for(int i=0; i<terrainTiles.Length; i++){
 
-        //Test if terrain is explored by player and constraints
-        if(terrainTiles[i].isExplored){
-          if (TerrainConstraints(i)){
+        if(terrainTiles[i].isExplored && TerrainConstraints(i)){
+
 
             //TODO: need to fix
             //Check that terrain is outside of left eye view
@@ -194,23 +183,24 @@ public partial class TerrainMain : MonoBehaviour
                 EnvironmentPlacement(i);
               // }
             // }
-          }
+
         }
 
         // PlaceEnemy(i);
       }
 
         //Update mesh
+        // mesh.Clear(); //TODO: check if we need it
         mesh.vertices = vertices;
+        mesh.triangles = triangles;
         mesh.RecalculateBounds();
         GetComponent<MeshCollider>().sharedMesh = null;
         GetComponent<MeshCollider>().sharedMesh = mesh;
     }
 
 
-    //TODO: replace with GetCurrentQuadrent() to get the quadrent of the verts. However up is different between the verts and the player
     /* DetermineQuadrent
-      => Determine where vector belongs based on center point found between the the center and the vertex world values
+      => Determine where vector belongs based on center point found between the the center and the vertex world position
       => Add the vert to the appropriate list
     */
     void DetermineQuadrent(Vector3 v, int i, float dist){
@@ -399,11 +389,35 @@ public partial class TerrainMain : MonoBehaviour
     }
 
 
+    /* UpdateExploredQuadrents
+      => Grab gardians location and set that quadrent to explored
+      => If the gardian does not exist(start of game), spawn in the gardian
+    */
+    private void UpdateExoloredQuadrents(){
+
+      if (player != null){
+
+        curPlayerQuad = GetCurrentQuadrent(player.transform.position);
+
+        if (curPlayerQuad >= 0){
+          terrainTiles[curPlayerQuad].isExplored = true;
+        }
+
+      } else {
+
+        //TODO: create/spawn in the player here
+
+        player = GameObject.FindGameObjectWithTag("Player");
+      }
+    }
+
+
     /* TerrainConstraints
       => Check if player is on or near updating tile
       => Check if enemy is present on updating tile
     */
     private bool TerrainConstraints(int tileNum){
+
       bool playerConstraint = false;
 
       //Test if player is on or next to terrain
@@ -414,10 +428,12 @@ public partial class TerrainMain : MonoBehaviour
           if (tileNum != 7 && tileNum != 1 && tileNum != 0){
             playerConstraint = true;
           }
+
         } else if (curPlayerQuad == 7){
           if (tileNum != 0 && tileNum != 6 && tileNum != 7){
             playerConstraint = true;
           }
+
         } else if (tileNum != (curPlayerQuad - 1) && tileNum != (curPlayerQuad + 1) && tileNum != curPlayerQuad){
           playerConstraint = true;
         }
