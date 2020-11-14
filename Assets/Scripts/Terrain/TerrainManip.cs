@@ -22,8 +22,21 @@ public partial class TerrainMain : MonoBehaviour
           UpdateTriangles(tileNum);
 
         } else {
-          //need to reset vertices and triangle array (removing the verts and triangles and shrinking the array)
-          Debug.Log("Single cliff change");
+
+          //Update vert array
+          Vector3[] newVertsArray = new Vector3[vertices.Length - 2];
+          for (int i=0; i<vertices.Length - 2; i++){
+            newVertsArray[i] = vertices[i];
+          }
+          vertices = newVertsArray;
+
+          //Update triangles array
+          int[] newTrianglesArray = new int[triangles.Length - 15];
+          for (int i=0; i<triangles.Length - 15; i++){
+            newTrianglesArray[i] = triangles[i];
+          }
+          triangles = newTrianglesArray;
+
         }
 
         //Reset addedVerts
@@ -82,7 +95,7 @@ public partial class TerrainMain : MonoBehaviour
         }
       }
 
-      //Based on the number of tiles changed, check verts with in the triangles array 
+      //Based on the number of tiles changed, check verts with in the triangles array
       for (int i=triangles.Length - counter*15; i<triangles.Length; i++){
         if (triangles[i] > terrainTiles[tileNum].addedVerts[1]){
           triangles[i] -= 2;
@@ -136,27 +149,22 @@ public partial class TerrainMain : MonoBehaviour
 
       //Return flat focus
       if (rand <= 50){
-        UpdateAsCWCliffTerrain(tileNum);
-        //UpdateAsFlatTerrain(tileNum);
+        UpdateAsFlatTerrain(tileNum);
 
       //Return uphill focus
       } else if (rand > 50 && rand <= 70){
-          UpdateAsCWCliffTerrain(tileNum);
-        // UpdateAsUphillTerrain(tileNum);
+        UpdateAsUphillTerrain(tileNum);
 
       //Return downhill focus
       } else if (rand > 70 && rand <= 90){
-          UpdateAsCWCliffTerrain(tileNum);
-        // UpdateAsDownhillTerrain(tileNum);
+        UpdateAsDownhillTerrain(tileNum);
 
-      } else if (rand > 90 && rand <= 100){
+      //Return cliff focus
+      } else if (rand > 90 && rand <= 95){
         UpdateAsCWCliffTerrain(tileNum);
-      // //Return cliff focus
-      // } else if (rand > 90 && rand <= 95){
-      //
-      // //Return pit swing focus
-      // } else {
-      //
+
+      } else {
+        UpdateAsCCWCliffTerrain(tileNum);
       }
     }
 
@@ -535,92 +543,79 @@ public partial class TerrainMain : MonoBehaviour
 
 
     /* UpdateAsCliffTerrain
-
+      => Determine the height differnce between the next and previous tiles
+      => Update height by vert groups (FarRight, FarLeft, MidRight, MidLeft)
+      => Create new verts and triangles for the cliff
     */
     private void UpdateAsCWCliffTerrain(int tileNum){
-
-      //TODO: Determine CW or CCW
 
       float prevTileHeight, nextTileHeight;
       float height, diff, randNum;
       float maxLow, maxHeight;
-      float heightSign;
 
       //Test for outliers for previous tile height (0)
       if (tileNum == 0){
-        prevTileHeight = vertices[terrainTiles[7].farRight[0]].z;
+        // prevTileHeight = vertices[terrainTiles[7].farRight[0]].z;
+        prevTileHeight = vertices[terrainTiles[7].farLeft[0]].z;
       } else {
-        prevTileHeight = vertices[terrainTiles[tileNum-1].farRight[0]].z;
+        // prevTileHeight = vertices[terrainTiles[tileNum-1].farRight[0]].z;
+        prevTileHeight = vertices[terrainTiles[tileNum-1].farLeft[0]].z;
       }
 
       //Test for outliers for the next tile height (7)
       if (tileNum == 7){
-        nextTileHeight = vertices[terrainTiles[0].farLeft[0]].z;
+        // nextTileHeight = vertices[terrainTiles[0].farLeft[0]].z;
+        nextTileHeight = vertices[terrainTiles[0].farRight[0]].z;
       } else {
-        nextTileHeight = vertices[terrainTiles[tileNum+1].farLeft[0]].z;
-      }
-
-      //TODO: Might randomize height diffrence and if cliff goes upward or down
-      // => diff can help determine the 2f value, whether pos or neg
-      diff = nextTileHeight - prevTileHeight;
-
-      //Testing
-      diff = 1;
-      randNum = 10;
-
-      if (diff > 0){
-        //upward
-        heightSign = -2f;
-      } else {
-        //downward
-        heightSign = 2f;
+        // nextTileHeight = vertices[terrainTiles[tileNum+1].farLeft[0]].z;
+        nextTileHeight = vertices[terrainTiles[tileNum+1].farRight[0]].z;
       }
 
 
       //FarRight
         randNum = Random.Range(1, 10); //1-6
-        height = UpdateGroupHeight(randNum, 20f, heightSign, nextTileHeight);
+        height = UpdateGroupHeight(randNum, 20f, -2f, prevTileHeight);
 
         //Add new height to vert group
         for (int j=0; j<4; j++){
           vertices[terrainTiles[tileNum].farRight[j]].z = height;
         }
 
-        nextTileHeight = height;
+        prevTileHeight = height;
 
 
       //midRight
         randNum = Random.Range(1, 10); //1-6
-        height = UpdateGroupHeight(randNum, 20f, heightSign, nextTileHeight);
+        height = UpdateGroupHeight(randNum, 20f, -2f, prevTileHeight);
 
         //Add new height to vert group
         for (int j=0; j<4; j++){
           vertices[terrainTiles[tileNum].midRight[j]].z = height;
         }
 
-        nextTileHeight = height;
+        prevTileHeight = height;
 
 
       //midLeft
         randNum = Random.Range(1, 10); //1-6
-        height = UpdateGroupHeight(randNum, 20f, heightSign, nextTileHeight);
+        height = UpdateGroupHeight(randNum, 20f, -2f, prevTileHeight);
 
         //Add new height to vert group
         for (int j=0; j<4; j++){
           vertices[terrainTiles[tileNum].midLeft[j]].z = height;
         }
 
-        nextTileHeight = height;
+        prevTileHeight = height;
 
 
       //farLeft
         for (int j=0; j<4; j++){
-          vertices[terrainTiles[tileNum].farLeft[j]].z = prevTileHeight;
+          vertices[terrainTiles[tileNum].farLeft[j]].z = nextTileHeight;
         }
 
 
       //New Verts
-      diff = nextTileHeight - prevTileHeight;
+      diff = prevTileHeight - nextTileHeight;
       diff += 0.01f;
 
       for (int i=0; i<terrainTiles[tileNum].addedVerts.Length; i++){
@@ -628,7 +623,7 @@ public partial class TerrainMain : MonoBehaviour
       }
 
       Vector3 newVert1 = new Vector3(vertices[terrainTiles[tileNum].farLeft[0]].x, vertices[terrainTiles[tileNum].farLeft[0]].y, vertices[terrainTiles[tileNum].farLeft[0]].z + diff);
-      Vector3 newVert2 = new Vector3(vertices[terrainTiles[tileNum].farLeft[1]].x, vertices[terrainTiles[tileNum].farLeft[1]].y, vertices[terrainTiles[tileNum].farLeft[1]].z + diff);
+      Vector3 newVert2 = new Vector3(vertices[terrainTiles[tileNum].farLeft[3]].x, vertices[terrainTiles[tileNum].farLeft[3]].y, vertices[terrainTiles[tileNum].farLeft[3]].z + diff);
 
       Vector3[] newVertices = new Vector3[vertices.Length + 2];
       vertices.CopyTo(newVertices, 0);
@@ -636,14 +631,6 @@ public partial class TerrainMain : MonoBehaviour
       newVertices[newVertices.Length - 1] = newVert2;
 
       vertices = newVertices;
-
-      //Testing
-      Debug.Log("Verts added to vertices");
-      Debug.Log("Vertices 1: " + vertices[vertices.Length - 2].x + " " + vertices[vertices.Length - 2].y + " " + vertices[vertices.Length - 2].z);
-      Debug.Log("Vertices 2: " + vertices[vertices.Length - 1].x + " " + vertices[vertices.Length - 1].y + " " + vertices[vertices.Length - 1].z);
-      Debug.Log("Verts added to addedVerts");
-      Debug.Log("Index 1: " + terrainTiles[tileNum].addedVerts[0] + " Vertices 1: " + vertices[terrainTiles[tileNum].addedVerts[0]].x + " " + vertices[terrainTiles[tileNum].addedVerts[0]].y + " " + vertices[terrainTiles[tileNum].addedVerts[0]].z);
-      Debug.Log("Index 2: " + terrainTiles[tileNum].addedVerts[1] + " Vertices 2: " + vertices[terrainTiles[tileNum].addedVerts[1]].x + " " + vertices[terrainTiles[tileNum].addedVerts[1]].y + " " + vertices[terrainTiles[tileNum].addedVerts[1]].z);
 
       //New Triangles
       for (int i=0; i<terrainTiles[tileNum].addedTriangles.Length; i++){
@@ -661,15 +648,15 @@ public partial class TerrainMain : MonoBehaviour
       //Cliff
       newTriangles[newTriangles.Length - 12] = vertices.Length - 2;
       newTriangles[newTriangles.Length - 11] = terrainTiles[tileNum].farLeft[0];
-      newTriangles[newTriangles.Length - 10] = terrainTiles[tileNum].farLeft[1];
+      newTriangles[newTriangles.Length - 10] = terrainTiles[tileNum].farLeft[3];
 
-      newTriangles[newTriangles.Length - 9] = terrainTiles[tileNum].farLeft[1];
+      newTriangles[newTriangles.Length - 9] = terrainTiles[tileNum].farLeft[3];
       newTriangles[newTriangles.Length - 8] = vertices.Length - 1;
       newTriangles[newTriangles.Length - 7] = vertices.Length - 2;
 
       //Cliff edge
       newTriangles[newTriangles.Length - 6] = vertices.Length - 1;
-      newTriangles[newTriangles.Length - 5] = terrainTiles[tileNum].midLeft[1];
+      newTriangles[newTriangles.Length - 5] = terrainTiles[tileNum].midLeft[3];
       newTriangles[newTriangles.Length - 4] = terrainTiles[tileNum].midLeft[0];
 
       newTriangles[newTriangles.Length - 3] = terrainTiles[tileNum].midLeft[0];
@@ -680,6 +667,7 @@ public partial class TerrainMain : MonoBehaviour
     }
 
 
+    //TODO: Get this working
     /* UpdateAsCCWCliffTerrain
 
     */
@@ -691,19 +679,111 @@ public partial class TerrainMain : MonoBehaviour
 
       //Test for outliers for previous tile height (0)
       if (tileNum == 0){
-        prevTileHeight = vertices[terrainTiles[7].farRight[0]].z;
+        prevTileHeight = vertices[terrainTiles[7].farLeft[0]].z;
       } else {
-        prevTileHeight = vertices[terrainTiles[tileNum-1].farRight[0]].z;
+        prevTileHeight = vertices[terrainTiles[tileNum-1].farLeft[0]].z;
       }
 
       //Test for outliers for the next tile height (7)
       if (tileNum == 7){
-        nextTileHeight = vertices[terrainTiles[0].farLeft[0]].z;
+        nextTileHeight = vertices[terrainTiles[0].farRight[0]].z;
       } else {
-        nextTileHeight = vertices[terrainTiles[tileNum+1].farLeft[0]].z;
+        nextTileHeight = vertices[terrainTiles[tileNum+1].farRight[0]].z;
       }
 
-      //TODO: determine up vs down cliff based on diff and which direction
+
+      //FarLeft
+        randNum = Random.Range(1, 10); //1-6
+        height = UpdateGroupHeight(randNum, 20f, -2f, nextTileHeight);
+
+        //Add new height to vert group
+        for (int j=0; j<4; j++){
+          vertices[terrainTiles[tileNum].farLeft[j]].z = height;
+        }
+
+        nextTileHeight = height;
+
+
+      //midLeft
+        randNum = Random.Range(1, 10); //1-6
+        height = UpdateGroupHeight(randNum, 20f, -2f, nextTileHeight);
+
+        //Add new height to vert group
+        for (int j=0; j<4; j++){
+          vertices[terrainTiles[tileNum].midLeft[j]].z = height;
+        }
+
+        nextTileHeight = height;
+
+
+      //midRight
+        randNum = Random.Range(1, 10); //1-6
+        height = UpdateGroupHeight(randNum, 20f, -2f, nextTileHeight);
+
+        //Add new height to vert group
+        for (int j=0; j<4; j++){
+          vertices[terrainTiles[tileNum].midRight[j]].z = height;
+        }
+
+        nextTileHeight = height;
+
+
+      //farRight
+        for (int j=0; j<4; j++){
+          vertices[terrainTiles[tileNum].farRight[j]].z = prevTileHeight;
+        }
+
+
+      //New Verts
+      diff = nextTileHeight - prevTileHeight;
+      diff += 0.01f;
+
+      for (int i=0; i<terrainTiles[tileNum].addedVerts.Length; i++){
+        terrainTiles[tileNum].addedVerts[i] = vertices.Length + i;
+      }
+
+      Vector3 newVert1 = new Vector3(vertices[terrainTiles[tileNum].farRight[0]].x, vertices[terrainTiles[tileNum].farRight[0]].y, vertices[terrainTiles[tileNum].farRight[0]].z + diff);
+      Vector3 newVert2 = new Vector3(vertices[terrainTiles[tileNum].farRight[3]].x, vertices[terrainTiles[tileNum].farRight[3]].y, vertices[terrainTiles[tileNum].farRight[3]].z + diff);
+
+      Vector3[] newVertices = new Vector3[vertices.Length + 2];
+      vertices.CopyTo(newVertices, 0);
+      newVertices[newVertices.Length - 2] = newVert1;
+      newVertices[newVertices.Length - 1] = newVert2;
+
+      vertices = newVertices;
+
+      //New Triangles
+      for (int i=0; i<terrainTiles[tileNum].addedTriangles.Length; i++){
+        terrainTiles[tileNum].addedTriangles[i] = triangles.Length + i;
+      }
+
+      int[] newTriangles = new int[triangles.Length + 15];
+      triangles.CopyTo(newTriangles, 0);
+
+      //Side
+      newTriangles[newTriangles.Length - 15] = vertices.Length - 2;
+      newTriangles[newTriangles.Length - 14] = terrainTiles[tileNum].farRight[0];
+      newTriangles[newTriangles.Length - 13] = terrainTiles[tileNum].midRight[0];
+
+      //Cliff
+      newTriangles[newTriangles.Length - 12] = vertices.Length - 2;
+      newTriangles[newTriangles.Length - 11] = terrainTiles[tileNum].farRight[3];
+      newTriangles[newTriangles.Length - 10] = terrainTiles[tileNum].farRight[0];
+
+      newTriangles[newTriangles.Length - 9] = terrainTiles[tileNum].farRight[3];
+      newTriangles[newTriangles.Length - 8] = vertices.Length - 2;
+      newTriangles[newTriangles.Length - 7] = vertices.Length - 1;
+
+      //Cliff edge
+      newTriangles[newTriangles.Length - 6] = vertices.Length - 1;
+      newTriangles[newTriangles.Length - 5] = terrainTiles[tileNum].midRight[0];
+      newTriangles[newTriangles.Length - 4] = terrainTiles[tileNum].midRight[3];
+
+      newTriangles[newTriangles.Length - 3] = terrainTiles[tileNum].midRight[0];
+      newTriangles[newTriangles.Length - 2] = vertices.Length - 1;
+      newTriangles[newTriangles.Length - 1] = vertices.Length - 2;
+
+      triangles = newTriangles;
     }
 
 
@@ -727,112 +807,5 @@ public partial class TerrainMain : MonoBehaviour
       }
 
       return height;
-    }
-
-
-    /*UpdateToTerrainCWUpwardCliff
-      => Update terrain tile to a clockwise upward cliff
-    */
-    private void UpdateToTerrainCWUpwardCliff(int i, float prevTileHeight, float nextTileHeight){
-
-      float num;
-
-      //Move outer verts
-
-      //Move FR to MR position
-      for(int j=0; j<4; j++){
-          vertices[terrainTiles[i].farRight[j]].x = vertices[terrainTiles[i].midRight[j]].x;
-          vertices[terrainTiles[i].farRight[j]].y = vertices[terrainTiles[i].midRight[j]].y;
-      }
-
-
-      //FarLeft
-      num = Random.Range(1, 7);
-      num = ((num - 9f) * (-2f) / 1000f);
-
-      if (prevTileHeight + num > 0.1f){
-        num = 0.1f;
-      } else {
-        num += prevTileHeight;
-      }
-
-      //Add new height to vert group
-      for (int j=0; j<4; j++){
-        vertices[terrainTiles[i].farLeft[j]].z = num;
-      }
-
-      //Set new prevTileHeight
-      prevTileHeight = num;
-
-
-      //MidLeft
-      num = Random.Range(1, 7);
-      num = ((num - 9f) * (-2f) / 1000f);
-
-      if (prevTileHeight + num > 0.1f){
-        num = 0.1f;
-      } else {
-        num += prevTileHeight;
-      }
-
-      //Add new height to vert group
-      for (int j=0; j<4; j++){
-        vertices[terrainTiles[i].midLeft[j]].z = num;
-      }
-
-      //Set new prevTileHeight
-      prevTileHeight = num;
-
-
-      //MidRight
-      num = Random.Range(1, 7);
-      num = ((num - 9f) * (-2f) / 1000f);
-
-      if (prevTileHeight + num > 0.1f){
-        num = 0.1f;
-      } else {
-        num += prevTileHeight;
-      }
-
-      //Add new height to vert group
-      for (int j=0; j<4; j++){
-        vertices[terrainTiles[i].midRight[j]].z = num;
-      }
-
-      //Set new prevTileHeight
-      prevTileHeight = num;
-
-
-      //FarRight
-      num = Random.Range(1, 7);
-      num = ((num - 11f) * (-2f) / 1000f);
-
-      for (int j=0; j<4; j++){
-        vertices[terrainTiles[i].farRight[j]].z = nextTileHeight + num;
-      }
-    }
-
-
-    /* UpdateToTerrainCWDownwardCLiff
-      => Update terrain tile to a clockwise downward cliff
-    */
-    private void UpdateToTerrainCWDownwardCLiff(int i, float prevTileHeight, float nextTileHeight){
-
-    }
-
-
-    /* UpdateToTerrainCCWUpwardCliff
-      => Update terrain tile to a counter clockwise upward cliff
-    */
-    private void UpdateToTerrainCCWUpwardCliff(int i, float prevTileHeight, float nextTileHeight){
-
-    }
-
-
-    /* UpdateToTerrainCCWDownwardCliff
-      => Update terrain tile to a counter clockwise downward cliff
-    */
-    private void UpdateToTerrainCCWDownwardCliff(int i, float prevTileHeight, float nextTileHeight){
-
     }
 }

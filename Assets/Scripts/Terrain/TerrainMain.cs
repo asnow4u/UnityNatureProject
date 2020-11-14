@@ -99,55 +99,57 @@ public partial class TerrainMain : MonoBehaviour
         DetermineVerticeGroups();
 
         // Testing Left
-        // for(int i=0; i<4; i++){
-        //   vertices[terrainTiles[1].farRight[i]].z = 0.06f;
-        // }
-        // for(int i=0; i<4; i++){
-        //   vertices[terrainTiles[1].midRight[i]].z = 0.06f;
-        // }
-        // for(int i=0; i<4; i++){
-        //   vertices[terrainTiles[1].midLeft[i]].z = 0.06f;
-        // }
-        // for(int i=0; i<4; i++){
-        //   vertices[terrainTiles[1].farLeft[i]].z = 0.06f;
-        // }
-        //
+        for (int j=0; j<terrainTiles.Length; j++){
+          for(int i=0; i<4; i++){
+            vertices[terrainTiles[j].farRight[i]].z = 0.06f;
+          }
+          for(int i=0; i<4; i++){
+            vertices[terrainTiles[j].midRight[i]].z = 0.06f;
+          }
+          for(int i=0; i<4; i++){
+            vertices[terrainTiles[j].midLeft[i]].z = 0.06f;
+          }
+          for(int i=0; i<4; i++){
+            vertices[terrainTiles[j].farLeft[i]].z = 0.06f;
+          }
+        }
+
         // //Testing Middle
         // for(int i=0; i<4; i++){
-        //   vertices[terrainTiles[4].farRight[i]].z = 0.1f;
+        //   vertices[terrainTiles[4].farRight[i]].z = 0.06f;
         // }
         // for(int i=0; i<4; i++){
-        //   vertices[terrainTiles[4].midRight[i]].z = 0.1f;
+        //   vertices[terrainTiles[4].midRight[i]].z = 0.06f;
         // }
         // for(int i=0; i<4; i++){
-        //   vertices[terrainTiles[4].midLeft[i]].z = 0.1f;
+        //   vertices[terrainTiles[4].midLeft[i]].z = 0.06f;
         // }
         // for(int i=0; i<4; i++){
-        //   vertices[terrainTiles[4].farLeft[i]].z = 0.1f;
+        //   vertices[terrainTiles[4].farLeft[i]].z = 0.06f;
         // }
         //
         // // //Testing Right
         // for(int i=0; i<4; i++){
-        //   vertices[terrainTiles[3].farRight[i]].z = 0.1f;
+        //   vertices[terrainTiles[3].farRight[i]].z = 0.06f;
         // }
         // for(int i=0; i<4; i++){
-        //   vertices[terrainTiles[3].midRight[i]].z = 0.1f;
+        //   vertices[terrainTiles[3].midRight[i]].z = 0.06f;
         // }
         // for(int i=0; i<4; i++){
-        //   vertices[terrainTiles[3].midLeft[i]].z = 0.1f;
+        //   vertices[terrainTiles[3].midLeft[i]].z = 0.06f;
         // }
         // for(int i=0; i<4; i++){
-        //   vertices[terrainTiles[3].farLeft[i]].z = 0.1f;
-        // }
+        //   vertices[terrainTiles[3].farLeft[i]].z = 0.06f;
+        //}
 
-        // terrainTiles[0].isExplored = true;
-        // terrainTiles[1].isExplored = true;
-        // terrainTiles[2].isExplored = true;
-        // terrainTiles[3].isExplored = true;
-        // terrainTiles[4].isExplored = true;
-        // terrainTiles[5].isExplored = true;
-        // terrainTiles[6].isExplored = true;
-        // terrainTiles[7].isExplored = true;
+        terrainTiles[0].isExplored = true;
+        terrainTiles[1].isExplored = true;
+        terrainTiles[2].isExplored = true;
+        terrainTiles[3].isExplored = true;
+        terrainTiles[4].isExplored = true;
+        terrainTiles[5].isExplored = true;
+        terrainTiles[6].isExplored = true;
+        terrainTiles[7].isExplored = true;
 
     }
 
@@ -190,7 +192,7 @@ public partial class TerrainMain : MonoBehaviour
       }
 
         //Update mesh
-        // mesh.Clear(); //TODO: check if we need it
+        mesh.Clear(); //TODO: check if we need it
         mesh.vertices = vertices;
         mesh.triangles = triangles;
         mesh.RecalculateBounds();

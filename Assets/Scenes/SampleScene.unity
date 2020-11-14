@@ -2597,6 +2597,8 @@ MonoBehaviour:
   smallRock: {fileID: -927199367670048503, guid: 3d2e36bf3170e5445bc31faeb4c6fe40,
     type: 3}
   cam: {fileID: 159225718}
+  maxTerrainHeight: 0
+  minTerrainHeight: 0
 --- !u!64 &1785445935
 MeshCollider:
   m_ObjectHideFlags: 0
