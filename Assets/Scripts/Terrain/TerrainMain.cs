@@ -2,35 +2,55 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
+/*TODO:
+  Currently when we add to the terrain, the added component is uneffected by the terrain (Unsure why exactly).
+  Originaly thought it had something to do with the meshs uvs, but it turns out that the array mesh.uv remains 0.
+  Option 1:
+    Could work on appling uvs to the terrain. Probably will need to be done anyways as a way of applying different materials in different places.
+    With that said we will need to divide the terrain up more to accompany these different materials.
+      -Player area, forest area, hill to pathway, pathway, downhill past pathway
+    Well need to astablish the uvs from the start and update them as the terrain changes
+
+  Option 2:
+    Keep googling XD
+*/
+
 public partial class TerrainMain : MonoBehaviour
 {
     public Camera cam;
     private Mesh mesh;
     private Vector3[] vertices;
     private int[] triangles;
+    private Vector2[] uvs;
 
-    private int curPlayerQuad;
+    public int curPlayerQuad;
     private bool updateTerrain;
-
+    public enum terrainFocus {Flat, Uphill, Downhill, CwCliff, CcwCliff, Island}
     public float maxTerrainHeight;
     public float minTerrainHeight;
 
+    public bool pulse;
+    public float adjustmentSpeed;
+
     private struct TerrainTile {
-        public int height;
-        public bool isExplored;
         public List<int> vertNum;
         public List<int> farRight;
         public List<int> midRight;
         public List<int> midLeft;
         public List<int> farLeft;
+        public terrainFocus focus;
+        public float[] heightAdjustment;
         public int[] addedVerts;
         public int[] addedTriangles;
+        public bool isExplored;
         public Enviroment enviroment;
     }
     private TerrainTile[] terrainTiles;
 
-    private EnemySpawn enemySpawn;
+    private EnemySpawnController enemySpawnObj;
     private GameObject player;
+
 
     /* Start
       => Initialize Variables
@@ -40,10 +60,10 @@ public partial class TerrainMain : MonoBehaviour
     {
 
         updateTerrain = false;
-        maxTerrainHeight = 0.1f;
-        minTerrainHeight = 0.0f;
 
-        enemySpawn = GetComponent<EnemySpawn>();
+        pulse = false;
+
+        enemySpawnObj = GetComponent<EnemySpawnController>();
         player = GameObject.FindGameObjectWithTag("Player");
 
         //Establish the 8 tiles
@@ -60,24 +80,26 @@ public partial class TerrainMain : MonoBehaviour
 
         //Initialize tile values
         for (int i=0; i<terrainTiles.Length; i++){
-          terrainTiles[i].height = 0;
           terrainTiles[i].isExplored = false;
           terrainTiles[i].vertNum = new List<int>();
           terrainTiles[i].farRight = new List<int>();
           terrainTiles[i].midRight = new List<int>();
           terrainTiles[i].midLeft = new List<int>();
           terrainTiles[i].farLeft = new List<int>();
-          terrainTiles[i].addedVerts = new int[] {-1, -1};
+          terrainTiles[i].focus = terrainFocus.Flat;
+          terrainTiles[i].heightAdjustment = new float[6]; //FL = [0], ML = [1], MR = [2], FR = [3], CWCliff = [4], CCWCliff = [5]
+          terrainTiles[i].addedVerts = new int[] {-1, -1, -1, -1}; //CwCliff = [0][1] && CcwCliff = [2][3]
           terrainTiles[i].addedTriangles = new int[] {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
           terrainTiles[i].enviroment.smallTrees = new List<GameObject>();
           terrainTiles[i].enviroment.rocks = new List<GameObject>();
 
         }
 
-        //Grab vertices from mesh
+        //Grab mesh data
         mesh = GetComponent<MeshFilter>().mesh;
         vertices = mesh.vertices;
         triangles = mesh.triangles;
+        uvs = mesh.uv;
 
         //Determine which vertices go to which quadrent
         for (int i=0; i<vertices.Length; i++){
@@ -99,20 +121,20 @@ public partial class TerrainMain : MonoBehaviour
         DetermineVerticeGroups();
 
         // Testing Left
-        for (int j=0; j<terrainTiles.Length; j++){
-          for(int i=0; i<4; i++){
-            vertices[terrainTiles[j].farRight[i]].z = 0.06f;
-          }
-          for(int i=0; i<4; i++){
-            vertices[terrainTiles[j].midRight[i]].z = 0.06f;
-          }
-          for(int i=0; i<4; i++){
-            vertices[terrainTiles[j].midLeft[i]].z = 0.06f;
-          }
-          for(int i=0; i<4; i++){
-            vertices[terrainTiles[j].farLeft[i]].z = 0.06f;
-          }
-        }
+        // for (int j=0; j<terrainTiles.Length; j++){
+        //   for(int i=0; i<4; i++){
+        //     vertices[terrainTiles[j].farRight[i]].z = 0.06f;
+        //   }
+        //   for(int i=0; i<4; i++){
+        //     vertices[terrainTiles[j].midRight[i]].z = 0.06f;
+        //   }
+        //   for(int i=0; i<4; i++){
+        //     vertices[terrainTiles[j].midLeft[i]].z = 0.06f;
+        //   }
+        //   for(int i=0; i<4; i++){
+        //     vertices[terrainTiles[j].farLeft[i]].z = 0.06f;
+        //   }
+        // }
 
         // //Testing Middle
         // for(int i=0; i<4; i++){
@@ -151,6 +173,10 @@ public partial class TerrainMain : MonoBehaviour
         terrainTiles[6].isExplored = true;
         terrainTiles[7].isExplored = true;
 
+        // Debug.Log("Vert: " + vertices.Length + " uvs: " + mesh.uv.Length);
+        // for (int i=0; i<20; i++){
+        //   Debug.Log("UV " + i + ": " + uvs[i].x + " " + uvs[i].y);
+        // }
     }
 
 
@@ -164,11 +190,46 @@ public partial class TerrainMain : MonoBehaviour
       //Update player explored quadrents
       UpdateExoloredQuadrents();
 
+
+
+
       //Loop through each terrain quad
       for(int i=0; i<terrainTiles.Length; i++){
 
-        if(terrainTiles[i].isExplored && TerrainConstraints(i)){
+        if (pulse){
+          DetermineTerrainFocus(i);
+        }
 
+
+        for (int j=0; j<terrainTiles[i].heightAdjustment.Length; j++){
+          if (terrainTiles[i].heightAdjustment[j] != 0f){
+            UpdateVertHeight(i, j);
+          }
+        }
+
+        //Check for CwCliff
+        if (terrainTiles[i].addedVerts[0] != -1){
+          if (terrainTiles[i].heightAdjustment[4] == 0f){
+            if (vertices[terrainTiles[i].addedVerts[0]].z == vertices[terrainTiles[i].farLeft[0]].z ){
+              ResetTerrainTile(i, true);
+            }
+          }
+        }
+
+        //Check for CcwCliff
+        if (terrainTiles[i].addedVerts[2] != -1){
+          if (terrainTiles[i].heightAdjustment[5] == 0f){
+            if (vertices[terrainTiles[i].addedVerts[2]].z == vertices[terrainTiles[i].farRight[0]].z){
+              // ResetTerrainTile(i, false);
+            }
+          }
+        }
+
+
+
+
+        //TODO: NOTE: Will adjust this later
+        if(terrainTiles[i].isExplored && TerrainConstraints(i)){
 
             //TODO: need to fix
             //Check that terrain is outside of left eye view
@@ -181,23 +242,31 @@ public partial class TerrainMain : MonoBehaviour
             //   Vector3 rightViewPos = cam.WorldToViewportPoint(vert);
             //   if (!(rightViewPos.x > -0.1f && rightViewPos.x < 1.1f && rightViewPos.y > 0 && rightViewPos.y < 1 && rightViewPos.z > 0)){
 
-                UpdateTerrain(i);
-                EnvironmentPlacement(i);
+
+
+                //EnvironmentPlacement(i); //NOTE: will need to set isExplored to false here or in the enemy spawn
+
               // }
             // }
-
         }
 
-        // PlaceEnemy(i);
+        // enemySpawnObj.UpdateEnemySpawn(i); //TODO: move this to where the EnvironmentPlacement is
       }
 
-        //Update mesh
-        mesh.Clear(); //TODO: check if we need it
-        mesh.vertices = vertices;
-        mesh.triangles = triangles;
-        mesh.RecalculateBounds();
-        GetComponent<MeshCollider>().sharedMesh = null;
-        GetComponent<MeshCollider>().sharedMesh = mesh;
+      pulse = false;
+
+      //Update mesh
+
+      mesh.Clear(); //NOTE: this will remove the error assosiated with not enough verts in the mesh
+      mesh.vertices = vertices;
+      mesh.triangles = triangles;
+
+      // mesh.uv = uvs;
+      mesh.RecalculateBounds();
+
+      //Reset collider
+      GetComponent<MeshCollider>().sharedMesh = null;
+      GetComponent<MeshCollider>().sharedMesh = mesh;
     }
 
 
@@ -441,6 +510,8 @@ public partial class TerrainMain : MonoBehaviour
         }
       }
 
+
+      //TODO: Instead of check for enemies, well move the enimies up till a raycast downward reads that there is terrain, then place them back (might not need if we change terrain manipulation to slowly increase/decrease)
       //Test if any enemies are on the quad
       bool enemyConstraint = true;
 
@@ -521,11 +592,11 @@ public partial class TerrainMain : MonoBehaviour
     }
 
 
-    /* GetCenterPointsFromQuad
+    /* GetCenterPointsFromTile
       => Get the center points between the verts of farLeft, midLeft, midRight, farRight
-      => Based on specified quadrent
+      => Based on specified tile
     */
-    public Vector3[] GetCenterPointsFromQuad(int quadNum){
+    public Vector3[] GetCenterPointsFromTile(int tileNum){
 
       Vector3[] centerPoints = new Vector3[3];
       Vector3 point1;
@@ -536,38 +607,50 @@ public partial class TerrainMain : MonoBehaviour
       //TODO will need to place constraints based on path taken, where the player is, Height of quadrent, ect. Just to check that it is a viable option
 
       //FarLeft - MidLeft
-      point1 = transform.TransformPoint(new Vector3(vertices[terrainTiles[quadNum].farLeft[3]].x, vertices[terrainTiles[quadNum].farLeft[3]].y, vertices[terrainTiles[quadNum].farLeft[3]].z));
-      point2 = transform.TransformPoint(new Vector3(vertices[terrainTiles[quadNum].midLeft[3]].x, vertices[terrainTiles[quadNum].midLeft[3]].y, vertices[terrainTiles[quadNum].midLeft[3]].z));
+      point1 = transform.TransformPoint(new Vector3(vertices[terrainTiles[tileNum].farLeft[3]].x, vertices[terrainTiles[tileNum].farLeft[3]].y, vertices[terrainTiles[tileNum].farLeft[3]].z));
+      point2 = transform.TransformPoint(new Vector3(vertices[terrainTiles[tileNum].midLeft[3]].x, vertices[terrainTiles[tileNum].midLeft[3]].y, vertices[terrainTiles[tileNum].midLeft[3]].z));
       farPoint = Vector3.Lerp(new Vector3(point1.x, point1.y, point1.z), new Vector3(point2.x, point2.y, point2.z), 0.5f);
 
-      point1 = transform.TransformPoint(new Vector3(vertices[terrainTiles[quadNum].farLeft[0]].x, vertices[terrainTiles[quadNum].farLeft[0]].y, vertices[terrainTiles[quadNum].farLeft[0]].z));
-      point2 = transform.TransformPoint(new Vector3(vertices[terrainTiles[quadNum].midLeft[0]].x, vertices[terrainTiles[quadNum].midLeft[0]].y, vertices[terrainTiles[quadNum].midLeft[0]].z));
+      point1 = transform.TransformPoint(new Vector3(vertices[terrainTiles[tileNum].farLeft[0]].x, vertices[terrainTiles[tileNum].farLeft[0]].y, vertices[terrainTiles[tileNum].farLeft[0]].z));
+      point2 = transform.TransformPoint(new Vector3(vertices[terrainTiles[tileNum].midLeft[0]].x, vertices[terrainTiles[tileNum].midLeft[0]].y, vertices[terrainTiles[tileNum].midLeft[0]].z));
       closePoint = Vector3.Lerp(new Vector3(point1.x, point1.y, point1.z), new Vector3(point2.x, point2.y, point2.z), 0.5f);
 
       centerPoints[0] = Vector3.Lerp(new Vector3(closePoint.x, closePoint.y, closePoint.z), new Vector3(farPoint.x, farPoint.y, farPoint.z), 0.5f);
 
       //MidLeft - MidRight
-      point1 = transform.TransformPoint(new Vector3(vertices[terrainTiles[quadNum].midLeft[3]].x, vertices[terrainTiles[quadNum].midLeft[3]].y, vertices[terrainTiles[quadNum].midLeft[3]].z));
-      point2 = transform.TransformPoint(new Vector3(vertices[terrainTiles[quadNum].midRight[3]].x, vertices[terrainTiles[quadNum].midRight[3]].y, vertices[terrainTiles[quadNum].midRight[3]].z));
+      point1 = transform.TransformPoint(new Vector3(vertices[terrainTiles[tileNum].midLeft[3]].x, vertices[terrainTiles[tileNum].midLeft[3]].y, vertices[terrainTiles[tileNum].midLeft[3]].z));
+      point2 = transform.TransformPoint(new Vector3(vertices[terrainTiles[tileNum].midRight[3]].x, vertices[terrainTiles[tileNum].midRight[3]].y, vertices[terrainTiles[tileNum].midRight[3]].z));
       farPoint = Vector3.Lerp(new Vector3(point1.x, point1.y, point1.z), new Vector3(point2.x, point2.y, point2.z), 0.5f);
 
-      point1 = transform.TransformPoint(new Vector3(vertices[terrainTiles[quadNum].midLeft[0]].x, vertices[terrainTiles[quadNum].midLeft[0]].y, vertices[terrainTiles[quadNum].midLeft[0]].z));
-      point2 = transform.TransformPoint(new Vector3(vertices[terrainTiles[quadNum].midRight[0]].x, vertices[terrainTiles[quadNum].midRight[0]].y, vertices[terrainTiles[quadNum].midRight[0]].z));
+      point1 = transform.TransformPoint(new Vector3(vertices[terrainTiles[tileNum].midLeft[0]].x, vertices[terrainTiles[tileNum].midLeft[0]].y, vertices[terrainTiles[tileNum].midLeft[0]].z));
+      point2 = transform.TransformPoint(new Vector3(vertices[terrainTiles[tileNum].midRight[0]].x, vertices[terrainTiles[tileNum].midRight[0]].y, vertices[terrainTiles[tileNum].midRight[0]].z));
       closePoint = Vector3.Lerp(new Vector3(point1.x, point1.y, point1.z), new Vector3(point2.x, point2.y, point2.z), 0.5f);
 
       centerPoints[1] = Vector3.Lerp(new Vector3(closePoint.x, closePoint.y, closePoint.z), new Vector3(farPoint.x, farPoint.y, farPoint.z), 0.5f);
 
       //MidRight - FarRight
-      point1 = transform.TransformPoint(new Vector3(vertices[terrainTiles[quadNum].midRight[3]].x, vertices[terrainTiles[quadNum].midRight[3]].y, vertices[terrainTiles[quadNum].midRight[3]].z));
-      point2 = transform.TransformPoint(new Vector3(vertices[terrainTiles[quadNum].farRight[3]].x, vertices[terrainTiles[quadNum].farRight[3]].y, vertices[terrainTiles[quadNum].farRight[3]].z));
+      point1 = transform.TransformPoint(new Vector3(vertices[terrainTiles[tileNum].midRight[3]].x, vertices[terrainTiles[tileNum].midRight[3]].y, vertices[terrainTiles[tileNum].midRight[3]].z));
+      point2 = transform.TransformPoint(new Vector3(vertices[terrainTiles[tileNum].farRight[3]].x, vertices[terrainTiles[tileNum].farRight[3]].y, vertices[terrainTiles[tileNum].farRight[3]].z));
       farPoint = Vector3.Lerp(new Vector3(point1.x, point1.y, point1.z), new Vector3(point2.x, point2.y, point2.z), 0.5f);
 
-      point1 = transform.TransformPoint(new Vector3(vertices[terrainTiles[quadNum].midRight[0]].x, vertices[terrainTiles[quadNum].midRight[0]].y, vertices[terrainTiles[quadNum].midRight[0]].z));
-      point2 = transform.TransformPoint(new Vector3(vertices[terrainTiles[quadNum].farRight[0]].x, vertices[terrainTiles[quadNum].farRight[0]].y, vertices[terrainTiles[quadNum].farRight[0]].z));
+      point1 = transform.TransformPoint(new Vector3(vertices[terrainTiles[tileNum].midRight[0]].x, vertices[terrainTiles[tileNum].midRight[0]].y, vertices[terrainTiles[tileNum].midRight[0]].z));
+      point2 = transform.TransformPoint(new Vector3(vertices[terrainTiles[tileNum].farRight[0]].x, vertices[terrainTiles[tileNum].farRight[0]].y, vertices[terrainTiles[tileNum].farRight[0]].z));
       closePoint = Vector3.Lerp(new Vector3(point1.x, point1.y, point1.z), new Vector3(point2.x, point2.y, point2.z), 0.5f);
 
       centerPoints[2] = Vector3.Lerp(new Vector3(closePoint.x, closePoint.y, closePoint.z), new Vector3(farPoint.x, farPoint.y, farPoint.z), 0.5f);
 
       return centerPoints;
+    }
+
+
+    /* CheckTileForCliff
+
+    */
+    public bool CheckTileForCliff(int tileNum){
+      if (terrainTiles[tileNum].addedVerts[0] < 0 ){
+        return false;
+      }
+
+      return true;
     }
 }

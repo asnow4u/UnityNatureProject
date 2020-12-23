@@ -199,32 +199,32 @@ public partial class TerrainMain : MonoBehaviour
       => Calls function from EnemySpawn, SpawnEnemy() to determine if / which enemy should be placed
     */
     //TODO: When getting the vertex on where to place enemy, determine the x and z so its deffinitly in the middle
-    void PlaceEnemy(int quadNum){
-
-      int randNum = Random.Range(1, 4);
-      Vector3 v = new Vector3();
-
-      switch(randNum){
-        case 1:
-          v = transform.TransformPoint(vertices[terrainTiles[quadNum].farLeft[0]].x * 1.1f, vertices[terrainTiles[quadNum].farLeft[0]].y, vertices[terrainTiles[quadNum].farLeft[0]].z * 1.1f);
-          enemySpawn.SpawnEnemy(v, player.GetComponent<GardianController>().GetProgression());
-          break;
-
-        case 2:
-          v = transform.TransformPoint(vertices[terrainTiles[quadNum].midLeft[0]].x * 1.1f, vertices[terrainTiles[quadNum].midLeft[0]].y, vertices[terrainTiles[quadNum].midLeft[0]].z * 1.1f);
-          enemySpawn.SpawnEnemy(v, player.GetComponent<GardianController>().GetProgression());
-          break;
-
-        case 3:
-          v = transform.TransformPoint(vertices[terrainTiles[quadNum].midRight[0]].x * 1.1f, vertices[terrainTiles[quadNum].midRight[0]].y, vertices[terrainTiles[quadNum].midRight[0]].z * 1.1f);
-          enemySpawn.SpawnEnemy(v, player.GetComponent<GardianController>().GetProgression());
-          break;
-
-        case 4:
-          v = transform.TransformPoint(vertices[terrainTiles[quadNum].farRight[0]].x * 1.1f, vertices[terrainTiles[quadNum].farRight[0]].y, vertices[terrainTiles[quadNum].farRight[0]].z * 1.1f);
-          enemySpawn.SpawnEnemy(v, player.GetComponent<GardianController>().GetProgression());
-          break;
-      }
-    }
+    // void SpawnEnemy(int quadNum){
+    //
+    //   int randNum = Random.Range(1, 4);
+    //   Vector3 v = new Vector3();
+    //
+    //   switch(randNum){
+    //     case 1:
+    //       v = transform.TransformPoint(vertices[terrainTiles[quadNum].farLeft[0]].x * 1.1f, vertices[terrainTiles[quadNum].farLeft[0]].y, vertices[terrainTiles[quadNum].farLeft[0]].z * 1.1f);
+    //       enemySpawnObj.SpawnEnemy(v, player.GetComponent<GardianController>().GetProgression());
+    //       break;
+    //
+    //     case 2:
+    //       v = transform.TransformPoint(vertices[terrainTiles[quadNum].midLeft[0]].x * 1.1f, vertices[terrainTiles[quadNum].midLeft[0]].y, vertices[terrainTiles[quadNum].midLeft[0]].z * 1.1f);
+    //       enemySpawnObj.SpawnEnemy(v, player.GetComponent<GardianController>().GetProgression());
+    //       break;
+    //
+    //     case 3:
+    //       v = transform.TransformPoint(vertices[terrainTiles[quadNum].midRight[0]].x * 1.1f, vertices[terrainTiles[quadNum].midRight[0]].y, vertices[terrainTiles[quadNum].midRight[0]].z * 1.1f);
+    //       enemySpawnObj.SpawnEnemy(v, player.GetComponent<GardianController>().GetProgression());
+    //       break;
+    //
+    //     case 4:
+    //       v = transform.TransformPoint(vertices[terrainTiles[quadNum].farRight[0]].x * 1.1f, vertices[terrainTiles[quadNum].farRight[0]].y, vertices[terrainTiles[quadNum].farRight[0]].z * 1.1f);
+    //       enemySpawnObj.SpawnEnemy(v, player.GetComponent<GardianController>().GetProgression());
+    //       break;
+    //   }
+    // }
 
 }

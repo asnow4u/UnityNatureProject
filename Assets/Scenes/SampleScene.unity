@@ -2608,7 +2608,8 @@ MonoBehaviour:
   curPlayerQuad: 0
   maxTerrainHeight: 0.1
   minTerrainHeight: 0
-  testing: 1
+  pulse: 0
+  adjustmentSpeed: 0.02
 --- !u!64 &1785445935
 MeshCollider:
   m_ObjectHideFlags: 0
