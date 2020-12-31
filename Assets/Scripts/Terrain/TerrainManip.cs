@@ -1037,7 +1037,7 @@ public partial class TerrainMain : MonoBehaviour
     /* ResetTerrainTile
       => Remove any previously added vertices and triangles used for cliffs
       => If the tile is not at the end of the vertices array / triangles array, switch positions with the tile that is at the end before removing verts and triangles
-        => Update the effected tiles vertices and triangles to reflect the position change within the vertices / triangles array 
+        => Update the effected tiles vertices and triangles to reflect the position change within the vertices / triangles array
     */
     void ResetTerrainTile(int tileNum, bool isCwCliff){
 
@@ -1151,89 +1151,5 @@ public partial class TerrainMain : MonoBehaviour
       vertices = newVertsArray;
 
       Debug.Log("Tile Cliffed Removed From: " + tileNum);
-    }
-
-
-    /*UpdateVertices
-      => Move vertices with a higher index down
-      => Adjust triangles array removing 2 slots
-      => Update each tiles addedVerts if affected
-      => Update affected verts within the triangles array
-    */
-    private void UpdateVertices(int tileNum){
-
-      //Move vertices down
-      for (int i = terrainTiles[tileNum].addedVerts[0]; i<vertices.Length - 2; i++){
-        vertices[i] = vertices[i + 2];
-      }
-
-      //Ajust vertices array to new size
-      Vector3[] newVertsArray = new Vector3[vertices.Length - 2];
-
-      for (int i=0; i<vertices.Length - 2; i++){
-        newVertsArray[i] = vertices[i];
-      }
-
-      vertices = newVertsArray;
-
-      //Update tiles indexs in addedVerts
-      int counter = 0;
-
-      for (int i=0; i<terrainTiles.Length; i++){
-        if (terrainTiles[i].addedVerts[0] != -1){
-
-          if (terrainTiles[i].addedVerts[0] > terrainTiles[tileNum].addedVerts[0]){
-
-            counter++; // keep track of how many tiles needed to be changed
-
-            for (int j=0; j<terrainTiles[i].addedVerts.Length; j++){
-              terrainTiles[i].addedVerts[j] -= 2;
-            }
-          }
-        }
-      }
-
-      //Based on the number of tiles changed, check verts with in the triangles array
-      for (int i=triangles.Length - counter*15; i<triangles.Length; i++){
-        if (triangles[i] > terrainTiles[tileNum].addedVerts[1]){
-          triangles[i] -= 2;
-        }
-      }
-    }
-
-
-    /*UpdateTriangles
-      => Move triangles with a higher index down
-      => Adjust triangles array removing 15 slots
-      => Update each tiles addedTriangles if affected
-    */
-    private void UpdateTriangles(int tileNum){
-
-      //Move triangles down
-      for (int i = terrainTiles[tileNum].addedTriangles[0]; i<triangles.Length - 15; i++){
-        triangles[i] = triangles[i + 15];
-      }
-
-      //Ajust triangles array
-      int[] newTrianglesArray = new int[triangles.Length - 15];
-
-      for (int i=0; i<triangles.Length - 15; i++){
-        newTrianglesArray[i] = triangles[i];
-      }
-
-      triangles = newTrianglesArray;
-
-      //Update tiles addedTriangles
-      for (int i=0; i<terrainTiles.Length; i++){
-        if (terrainTiles[i].addedVerts[0] != -1){
-
-          if (terrainTiles[i].addedTriangles[0] > terrainTiles[tileNum].addedTriangles[0]){
-
-            for (int j=0; j<15; j++){
-              terrainTiles[i].addedTriangles[j] -= 15;
-            }
-          }
-        }
-      }
     }
 }

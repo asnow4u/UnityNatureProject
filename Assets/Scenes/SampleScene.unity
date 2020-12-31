@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.4409235, g: 0.48963994, b: 0.5697422, a: 1}
+  m_IndirectSpecularColor: {r: 0.4366757, g: 0.48427194, b: 0.5645252, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -408,7 +408,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 6
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!120 &181502863
 LineRenderer:
@@ -1220,7 +1220,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4408297863206454, guid: 6bbfea6690ef7724ba495c866081f855, type: 3}
       propertyPath: m_RootOrder
-      value: 7
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 4408297863206454, guid: 6bbfea6690ef7724ba495c866081f855, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -1404,13 +1404,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 705507993}
-  m_LocalRotation: {x: 0.5169975, y: -0.21534155, z: 0.18473004, w: 0.8075991}
-  m_LocalPosition: {x: 47.7, y: 9, z: 49.6}
+  m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: 110.8, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 3
-  m_LocalEulerAnglesHint: {x: 113.849, y: -202.819, z: -169.207}
+  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
 --- !u!1001 &714645328
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2605,11 +2605,20 @@ MonoBehaviour:
   smallRock: {fileID: -927199367670048503, guid: 3d2e36bf3170e5445bc31faeb4c6fe40,
     type: 3}
   cam: {fileID: 159225718}
+  mesh: {fileID: 0}
+  vertices: []
+  triangles: 
+  normals: []
+  uvs: []
+  renderer: {fileID: 0}
+  pathMaterial: {fileID: 2100000, guid: 35399b6fb92c02a419a795cc9026b268, type: 2}
+  vertTestNum: 0
   curPlayerQuad: 0
   maxTerrainHeight: 0.1
   minTerrainHeight: 0
   pulse: 0
   adjustmentSpeed: 0.02
+  mat: {fileID: 0}
 --- !u!64 &1785445935
 MeshCollider:
   m_ObjectHideFlags: 0

@@ -19,10 +19,15 @@ using UnityEngine;
 public partial class TerrainMain : MonoBehaviour
 {
     public Camera cam;
-    private Mesh mesh;
-    private Vector3[] vertices;
-    private int[] triangles;
-    private Vector2[] uvs;
+    public Mesh mesh;
+    public Vector3[] vertices;
+    public int[] triangles;
+    public Vector3[] normals;
+    public Vector2[] uvs;
+    public Renderer renderer;
+    public Material pathMaterial;
+
+    public int vertTestNum; //Test
 
     public int curPlayerQuad;
     private bool updateTerrain;
@@ -51,6 +56,8 @@ public partial class TerrainMain : MonoBehaviour
     private EnemySpawnController enemySpawnObj;
     private GameObject player;
 
+    public Material mat;
+
 
     /* Start
       => Initialize Variables
@@ -58,6 +65,7 @@ public partial class TerrainMain : MonoBehaviour
     */
     void Start()
     {
+        vertTestNum = 0; //Test
 
         updateTerrain = false;
 
@@ -99,7 +107,11 @@ public partial class TerrainMain : MonoBehaviour
         mesh = GetComponent<MeshFilter>().mesh;
         vertices = mesh.vertices;
         triangles = mesh.triangles;
-        uvs = mesh.uv;
+        uvs = new Vector2[vertices.Length];
+        EstablishUV();
+
+        // renderer = GetComponent<MeshFilter>().GetComponent<Renderer>();
+        renderer = GetComponent<MeshRenderer>().GetComponent<Renderer>();
 
         //Determine which vertices go to which quadrent
         for (int i=0; i<vertices.Length; i++){
@@ -191,8 +203,6 @@ public partial class TerrainMain : MonoBehaviour
       UpdateExoloredQuadrents();
 
 
-
-
       //Loop through each terrain quad
       for(int i=0; i<terrainTiles.Length; i++){
 
@@ -253,21 +263,42 @@ public partial class TerrainMain : MonoBehaviour
         // enemySpawnObj.UpdateEnemySpawn(i); //TODO: move this to where the EnvironmentPlacement is
       }
 
+
+      //Testing
+      vertices[vertTestNum] = new Vector3(vertices[vertTestNum].x, vertices[vertTestNum].y, 0.05f);
+
+
       pulse = false;
 
       //Update mesh
-
       mesh.Clear(); //NOTE: this will remove the error assosiated with not enough verts in the mesh
       mesh.vertices = vertices;
       mesh.triangles = triangles;
 
-      // mesh.uv = uvs;
+      uvs = new Vector2[vertices.Length]; //Testing
+      EstablishUV(); //Testing
+      mesh.uv = uvs;
+
+      mesh.RecalculateNormals();
       mesh.RecalculateBounds();
 
       //Reset collider
       GetComponent<MeshCollider>().sharedMesh = null;
       GetComponent<MeshCollider>().sharedMesh = mesh;
     }
+
+
+    // void OnDrawGizmosSelected()
+    // {
+    //     // Draws a blue line from this transform to the target
+    //     Gizmos.color = Color.red;
+    //
+    //     if (mesh != null){
+    //       for(int i=0; i<mesh.vertexCount; i++){
+    //         Gizmos.DrawLine(transform.TransformPoint(mesh.vertices[i]), transform.TransformPoint(mesh.vertices[i]) + mesh.normals[i] * 5f);
+    //       }
+    //     }
+    // }
 
 
     /* DetermineQuadrent
@@ -456,6 +487,116 @@ public partial class TerrainMain : MonoBehaviour
           terrainTiles[quadNum].farLeft.Add(temp);
           break;
 
+      }
+    }
+
+
+    /* EstablishUVs
+      => Establish the original uvs for the start vertices
+      => UVs are divided into 4 starting points and alternate by every 4
+    */
+    private void EstablishUV(){
+
+      bool alternate = true;
+      int centerNum, loop1Num, loop2Num, pathwayLoopNum, outerLoopNum;
+
+      //Start Squares
+
+      //Center
+      //TODO: NOTE: Based on how the center works, this will need to be half points, so probably wait till we are working with multiple textures or one texture with multiple parts to it (mountain / soil textures)
+
+      //Loop1 (0-62)
+      uvs[0] = new Vector2(1, 1);
+      uvs[1] = new Vector2(1, 0);
+      uvs[2] = new Vector2(0, 0);
+      uvs[3] = new Vector2(0, 1);
+      loop1Num = 4;
+
+      //Loop2 (96-159)
+      uvs[96] = new Vector2(1, 1);
+      uvs[97] = new Vector2(1, 0);
+      uvs[98] = new Vector2(0, 0);
+      uvs[99] = new Vector2(0, 1);
+      loop2Num = 100;
+
+      //Pathway (160-223)
+      uvs[160] = new Vector2(1, 1);
+      uvs[161] = new Vector2(1, 0);
+      uvs[162] = new Vector2(0, 0);
+      uvs[163] = new Vector2(0, 1);
+      pathwayLoopNum = 164;
+
+      //OuterLoop(224-287)
+      uvs[224] = new Vector2(1, 1);
+      uvs[225] = new Vector2(1, 0);
+      uvs[226] = new Vector2(0, 0);
+      uvs[227] = new Vector2(0, 1);
+      outerLoopNum = 228;
+
+      for (int i=0; i<15; i++){
+        if (alternate){
+
+          //Center
+
+          //Loop1
+          uvs[loop1Num] = new Vector2(1, 0);
+          uvs[loop1Num+1] = new Vector2(0, 1);
+          uvs[loop1Num+2] = new Vector2(0, 0);
+          uvs[loop1Num+3] = new Vector2(1, 1);
+
+          //Loop2
+          uvs[loop2Num] = new Vector2(0, 1);
+          uvs[loop2Num+1] = new Vector2(1, 0);
+          uvs[loop2Num+2] = new Vector2(0, 0);
+          uvs[loop2Num+3] = new Vector2(1, 1);
+
+          //PathwayLoop
+          uvs[pathwayLoopNum] = new Vector2(0, 1);
+          uvs[pathwayLoopNum+1] = new Vector2(1, 0);
+          uvs[pathwayLoopNum+2] = new Vector2(0, 0);
+          uvs[pathwayLoopNum+3] = new Vector2(1, 1);
+
+          //OuterLoop
+          uvs[outerLoopNum] = new Vector2(0, 1);
+          uvs[outerLoopNum+1] = new Vector2(1, 0);
+          uvs[outerLoopNum+2] = new Vector2(0, 0);
+          uvs[outerLoopNum+3] = new Vector2(1, 1);
+
+        } else {
+
+          //Center
+
+          //Loop1
+          uvs[loop1Num] = new Vector2(0, 0);
+          uvs[loop1Num+1] = new Vector2(1, 1);
+          uvs[loop1Num+2] = new Vector2(1, 0);
+          uvs[loop1Num+3] = new Vector2(0, 1);
+
+          //Loop2
+          uvs[loop2Num] = new Vector2(1, 1);
+          uvs[loop2Num+1] = new Vector2(0, 0);
+          uvs[loop2Num+2] = new Vector2(1, 0);
+          uvs[loop2Num+3] = new Vector2(0, 1);
+
+          //PathwayLoop
+          uvs[pathwayLoopNum] = new Vector2(1, 1);
+          uvs[pathwayLoopNum+1] = new Vector2(0, 0);
+          uvs[pathwayLoopNum+2] = new Vector2(1, 0);
+          uvs[pathwayLoopNum+3] = new Vector2(0, 1);
+
+          //OuterLoop
+          uvs[outerLoopNum] = new Vector2(1, 1);
+          uvs[outerLoopNum+1] = new Vector2(0, 0);
+          uvs[outerLoopNum+2] = new Vector2(1, 0);
+          uvs[outerLoopNum+3] = new Vector2(0, 1);
+
+        }
+
+        loop1Num += 4;
+        loop2Num += 4;
+        pathwayLoopNum += 4;
+        outerLoopNum += 4;
+        alternate = !alternate;
       }
     }
 
