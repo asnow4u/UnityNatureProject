@@ -368,6 +368,11 @@ public partial class TerrainMain : MonoBehaviour
           height = UpdateGroupHeight(randNum, 7f, 2f, nextTileHeight);
         }
 
+        //Testing
+        if(height == 0f){
+          Debug.Log("HEIGHT IS SET TO ZERO for tile " + tileNum);
+        }
+
         ///Update new height adjustment
         terrainTiles[tileNum].heightAdjustment[0] = height;
 
@@ -424,6 +429,7 @@ public partial class TerrainMain : MonoBehaviour
 
       //Cliff
         if (terrainTiles[tileNum].focus == terrainFocus.CwCliff){
+          Debug.Log("tile " + tileNum + " heightAdjustment[4] set to " + terrainTiles[tileNum].heightAdjustment[0]);
           terrainTiles[tileNum].heightAdjustment[4] = terrainTiles[tileNum].heightAdjustment[0];
         }
 
@@ -559,6 +565,23 @@ public partial class TerrainMain : MonoBehaviour
 
           triangles = newTriangles;
 
+
+          //New UVs
+          Vector2[] newUVs = new Vector2[uvs.Length + 2];
+          uvs.CopyTo(newUVs, 0);
+
+          if (uvs[terrainTiles[tileNum].farLeft[0]].x == 0){
+            newUVs[newUVs.Length -2] = new Vector2(0,0);
+            newUVs[newUVs.Length -1] = new Vector2(1,1);
+
+          } else {
+            newUVs[newUVs.Length -2] = new Vector2(0,1);
+            newUVs[newUVs.Length -1] = new Vector2(1,0);
+          }
+
+          uvs = newUVs;
+
+
           //Set Focus
           if (terrainTiles[tileNum].focus == terrainFocus.CcwCliff){
             terrainTiles[tileNum].focus = terrainFocus.Island;
@@ -669,6 +692,7 @@ public partial class TerrainMain : MonoBehaviour
 
           vertices = newVertices;
 
+
           //New Triangles
           for (int i=0; i<terrainTiles[tileNum].addedTriangles.Length; i++){
             terrainTiles[tileNum].addedTriangles[i] = triangles.Length + i;
@@ -701,6 +725,24 @@ public partial class TerrainMain : MonoBehaviour
           newTriangles[newTriangles.Length - 1] = vertices.Length - 2;
 
           triangles = newTriangles;
+
+
+          //New UVs
+          Vector2[] newUVs = new Vector2[uvs.Length + 2];
+          uvs.CopyTo(newUVs, 0);
+
+          if (uvs[terrainTiles[tileNum].farLeft[0]].x == 0){
+            newUVs[newUVs.Length -2] = new Vector2(1,0);
+            newUVs[newUVs.Length -1] = new Vector2(0,1);
+
+          } else {
+
+            newUVs[newUVs.Length -2] = new Vector2(1,1);
+            newUVs[newUVs.Length -1] = new Vector2(0,0);
+          }
+
+          uvs = newUVs;
+
 
           //Set focus
           if (terrainTiles[tileNum].focus == terrainFocus.CwCliff){
@@ -762,10 +804,10 @@ public partial class TerrainMain : MonoBehaviour
             if (vertices[terrainTiles[tileNum].farLeft[0]].z + adjustmentSpeed >= terrainTiles[tileNum].heightAdjustment[0]){
 
               for (int i=0; i<4; i++){
-                vertices[terrainTiles[tileNum].farLeft[i]].z = terrainTiles[tileNum].heightAdjustment[0];
+                vertices[terrainTiles[tileNum].farLeft[i]].z = (float)terrainTiles[tileNum].heightAdjustment[0];
               }
 
-              terrainTiles[tileNum].heightAdjustment[0] = 0f;
+              terrainTiles[tileNum].heightAdjustment[0] = null;
 
             } else {
 
@@ -781,10 +823,10 @@ public partial class TerrainMain : MonoBehaviour
             if (vertices[terrainTiles[tileNum].farLeft[0]].z - adjustmentSpeed <= terrainTiles[tileNum].heightAdjustment[0]){
 
               for (int i=0; i<4; i++){
-                vertices[terrainTiles[tileNum].farLeft[i]].z = terrainTiles[tileNum].heightAdjustment[0];
+                vertices[terrainTiles[tileNum].farLeft[i]].z = (float)terrainTiles[tileNum].heightAdjustment[0];
               }
 
-              terrainTiles[tileNum].heightAdjustment[0] = 0f;
+              terrainTiles[tileNum].heightAdjustment[0] = null;
 
             } else {
 
@@ -806,10 +848,10 @@ public partial class TerrainMain : MonoBehaviour
             if (vertices[terrainTiles[tileNum].midLeft[0]].z + adjustmentSpeed >= terrainTiles[tileNum].heightAdjustment[1]){
 
               for (int i=0; i<4; i++){
-                vertices[terrainTiles[tileNum].midLeft[i]].z = terrainTiles[tileNum].heightAdjustment[1];
+                vertices[terrainTiles[tileNum].midLeft[i]].z = (float)terrainTiles[tileNum].heightAdjustment[1];
               }
 
-              terrainTiles[tileNum].heightAdjustment[1] = 0f;
+              terrainTiles[tileNum].heightAdjustment[1] = null;
 
             } else {
 
@@ -825,10 +867,10 @@ public partial class TerrainMain : MonoBehaviour
             if (vertices[terrainTiles[tileNum].midLeft[0]].z - adjustmentSpeed <= terrainTiles[tileNum].heightAdjustment[1]){
 
               for (int i=0; i<4; i++){
-                vertices[terrainTiles[tileNum].midLeft[i]].z = terrainTiles[tileNum].heightAdjustment[1];
+                vertices[terrainTiles[tileNum].midLeft[i]].z = (float)terrainTiles[tileNum].heightAdjustment[1];
               }
 
-              terrainTiles[tileNum].heightAdjustment[1] = 0f;
+              terrainTiles[tileNum].heightAdjustment[1] = null;
 
             } else {
 
@@ -850,10 +892,10 @@ public partial class TerrainMain : MonoBehaviour
             if (vertices[terrainTiles[tileNum].midRight[0]].z + adjustmentSpeed >= terrainTiles[tileNum].heightAdjustment[2]){
 
               for (int i=0; i<4; i++){
-                vertices[terrainTiles[tileNum].midRight[i]].z = terrainTiles[tileNum].heightAdjustment[2];
+                vertices[terrainTiles[tileNum].midRight[i]].z = (float)terrainTiles[tileNum].heightAdjustment[2];
               }
 
-              terrainTiles[tileNum].heightAdjustment[2] = 0f;
+              terrainTiles[tileNum].heightAdjustment[2] = null;
 
             } else {
 
@@ -869,10 +911,10 @@ public partial class TerrainMain : MonoBehaviour
             if (vertices[terrainTiles[tileNum].midRight[0]].z - adjustmentSpeed <= terrainTiles[tileNum].heightAdjustment[2]){
 
               for (int i=0; i<4; i++){
-                vertices[terrainTiles[tileNum].midRight[i]].z = terrainTiles[tileNum].heightAdjustment[2];
+                vertices[terrainTiles[tileNum].midRight[i]].z = (float)terrainTiles[tileNum].heightAdjustment[2];
               }
 
-              terrainTiles[tileNum].heightAdjustment[2] = 0f;
+              terrainTiles[tileNum].heightAdjustment[2] = null;
 
             } else {
 
@@ -894,10 +936,10 @@ public partial class TerrainMain : MonoBehaviour
             if (vertices[terrainTiles[tileNum].farRight[0]].z + adjustmentSpeed >= terrainTiles[tileNum].heightAdjustment[3]){
 
               for (int i=0; i<4; i++){
-                vertices[terrainTiles[tileNum].farRight[i]].z = terrainTiles[tileNum].heightAdjustment[3];
+                vertices[terrainTiles[tileNum].farRight[i]].z = (float)terrainTiles[tileNum].heightAdjustment[3];
               }
 
-              terrainTiles[tileNum].heightAdjustment[3] = 0f;
+              terrainTiles[tileNum].heightAdjustment[3] = null;
 
             } else {
 
@@ -913,10 +955,10 @@ public partial class TerrainMain : MonoBehaviour
             if (vertices[terrainTiles[tileNum].farRight[0]].z - adjustmentSpeed <= terrainTiles[tileNum].heightAdjustment[3]){
 
               for (int i=0; i<4; i++){
-                vertices[terrainTiles[tileNum].farRight[i]].z = terrainTiles[tileNum].heightAdjustment[3];
+                vertices[terrainTiles[tileNum].farRight[i]].z = (float)terrainTiles[tileNum].heightAdjustment[3];
               }
 
-              terrainTiles[tileNum].heightAdjustment[3] = 0f;
+              terrainTiles[tileNum].heightAdjustment[3] = null;
 
             } else {
 
@@ -931,11 +973,9 @@ public partial class TerrainMain : MonoBehaviour
         //CWCliff
         case 4:
 
-          if (terrainTiles[tileNum].addedVerts[0] != -1){
+          Debug.Log("CwCliff Update for tile " + tileNum);
 
-            if (terrainTiles[tileNum].addedVerts[0] >= vertices.Length){
-              Debug.Log(" Length: " + vertices.Length + " addedVerts[0]: " + terrainTiles[tileNum].addedVerts[0]);
-            }
+          if (terrainTiles[tileNum].addedVerts[0] != -1){
 
             //Upward Movement
             if (terrainTiles[tileNum].heightAdjustment[4] > vertices[terrainTiles[tileNum].addedVerts[0]].z){
@@ -943,13 +983,13 @@ public partial class TerrainMain : MonoBehaviour
               //Test if new height is over height goal
               if (vertices[terrainTiles[tileNum].addedVerts[0]].z + adjustmentSpeed >= terrainTiles[tileNum].heightAdjustment[4]){
 
-                vertices[terrainTiles[tileNum].addedVerts[0]].z = terrainTiles[tileNum].heightAdjustment[4];
-                vertices[terrainTiles[tileNum].addedVerts[1]].z = terrainTiles[tileNum].heightAdjustment[4];
+                vertices[terrainTiles[tileNum].addedVerts[0]].z = (float)terrainTiles[tileNum].heightAdjustment[4];
+                vertices[terrainTiles[tileNum].addedVerts[1]].z = (float)terrainTiles[tileNum].heightAdjustment[4];
 
-                terrainTiles[tileNum].heightAdjustment[4] = 0f;
+                terrainTiles[tileNum].heightAdjustment[4] = null;
 
                 //Test
-                Debug.Log("Tile " + tileNum + " Cliff heightAdjustment set to 0f");
+                Debug.Log("Tile " + tileNum + " Cliff heightAdjustment set to 0f (Upward)");
 
               } else {
 
@@ -963,13 +1003,13 @@ public partial class TerrainMain : MonoBehaviour
               //Test if new height is under height goal
               if (vertices[terrainTiles[tileNum].addedVerts[0]].z - adjustmentSpeed <= terrainTiles[tileNum].heightAdjustment[4]){
 
-                vertices[terrainTiles[tileNum].addedVerts[0]].z = terrainTiles[tileNum].heightAdjustment[4];
-                vertices[terrainTiles[tileNum].addedVerts[1]].z = terrainTiles[tileNum].heightAdjustment[4];
+                vertices[terrainTiles[tileNum].addedVerts[0]].z = (float)terrainTiles[tileNum].heightAdjustment[4];
+                vertices[terrainTiles[tileNum].addedVerts[1]].z = (float)terrainTiles[tileNum].heightAdjustment[4];
 
-                terrainTiles[tileNum].heightAdjustment[4] = 0f;
+                terrainTiles[tileNum].heightAdjustment[4] = null;
 
                 //Test
-                Debug.Log("Tile " + tileNum + " Cliff heightAdjustment set to 0f");
+                Debug.Log("Tile " + tileNum + " Cliff heightAdjustment set to 0f (Downward)");
 
               } else {
 
@@ -992,10 +1032,10 @@ public partial class TerrainMain : MonoBehaviour
               //Test if new height is over height goal
               if (vertices[terrainTiles[tileNum].addedVerts[2]].z + adjustmentSpeed >= terrainTiles[tileNum].heightAdjustment[5]){
 
-                vertices[terrainTiles[tileNum].addedVerts[2]].z = terrainTiles[tileNum].heightAdjustment[5];
-                vertices[terrainTiles[tileNum].addedVerts[3]].z = terrainTiles[tileNum].heightAdjustment[5];
+                vertices[terrainTiles[tileNum].addedVerts[2]].z = (float)terrainTiles[tileNum].heightAdjustment[5];
+                vertices[terrainTiles[tileNum].addedVerts[3]].z = (float)terrainTiles[tileNum].heightAdjustment[5];
 
-                terrainTiles[tileNum].heightAdjustment[5] = 0f;
+                terrainTiles[tileNum].heightAdjustment[5] = null;
 
                 //Test
                 Debug.Log("Tile " + tileNum + " Cliff heightAdjustment set to 0f");
@@ -1012,10 +1052,10 @@ public partial class TerrainMain : MonoBehaviour
               //Test if new height is under height goal
               if (vertices[terrainTiles[tileNum].addedVerts[2]].z - adjustmentSpeed <= terrainTiles[tileNum].heightAdjustment[5]){
 
-                vertices[terrainTiles[tileNum].addedVerts[2]].z = terrainTiles[tileNum].heightAdjustment[5];
-                vertices[terrainTiles[tileNum].addedVerts[3]].z = terrainTiles[tileNum].heightAdjustment[5];
+                vertices[terrainTiles[tileNum].addedVerts[2]].z = (float)terrainTiles[tileNum].heightAdjustment[5];
+                vertices[terrainTiles[tileNum].addedVerts[3]].z = (float)terrainTiles[tileNum].heightAdjustment[5];
 
-                terrainTiles[tileNum].heightAdjustment[5] = 0f;
+                terrainTiles[tileNum].heightAdjustment[5] = null;
 
                 //Test
                 Debug.Log("Tile " + tileNum + " Cliff heightAdjustment set to 0f");
@@ -1054,12 +1094,16 @@ public partial class TerrainMain : MonoBehaviour
         index2 = terrainTiles[tileNum].addedVerts[3];
       }
 
+
       //Check if tileNums addedVerts are at the end of the array, if not adjust the array
       if (index2 + 1 < vertices.Length){
 
         //Load end values into vertices[tileNum.addedVerts]
         vertices[index1] = vertices[vertices.Length - 2];
         vertices[index2] = vertices[vertices.Length - 1];
+
+        uvs[index1] = uvs[vertices.Length - 2];
+        uvs[index2] = uvs[vertices.Length - 1];
 
         //Find the tile that has the addedVert index for the end of the vertices array
         int updateTile = -1;
@@ -1104,9 +1148,6 @@ public partial class TerrainMain : MonoBehaviour
         //Update updateTiles addedTriangles that contain the index for the end of the vertices array
         for (int j=0; j<terrainTiles[updateTile].addedTriangles.Length; j++){
 
-          Debug.Log("addedTriangle: " + j);
-
-          Debug.Log("triangle Index: " + triangles[terrainTiles[updateTile].addedTriangles[j]] + " verticesLength-1: " + (vertices.Length - 1) + "verticesLength-2: " + (vertices.Length - 2));
           if (triangles[terrainTiles[updateTile].addedTriangles[j]] == vertices.Length - 2){
             triangles[terrainTiles[updateTile].addedTriangles[j]] = index1;
           }
@@ -1143,11 +1184,14 @@ public partial class TerrainMain : MonoBehaviour
       triangles = newTrianglesArray;
 
 
-      //Remove end of vertices array
+      //Remove end of vertices and uvs array
       Vector3[] newVertsArray = new Vector3[vertices.Length - 2];
-      for (int i=0; i<vertices.Length - 2; i++){
+      Vector2[] newUVs = new Vector2[uvs.Length - 2];
+      for (int i=0; i<vertices.Length - 2; i++){ //TODO: see if COPYTO can be used instead
         newVertsArray[i] = vertices[i];
+        newUVs[i] = uvs[i];
       }
+      uvs = newUVs;
       vertices = newVertsArray;
 
       Debug.Log("Tile Cliffed Removed From: " + tileNum);

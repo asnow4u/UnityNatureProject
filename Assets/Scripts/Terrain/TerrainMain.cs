@@ -3,19 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-/*TODO:
-  Currently when we add to the terrain, the added component is uneffected by the terrain (Unsure why exactly).
-  Originaly thought it had something to do with the meshs uvs, but it turns out that the array mesh.uv remains 0.
-  Option 1:
-    Could work on appling uvs to the terrain. Probably will need to be done anyways as a way of applying different materials in different places.
-    With that said we will need to divide the terrain up more to accompany these different materials.
-      -Player area, forest area, hill to pathway, pathway, downhill past pathway
-    Well need to astablish the uvs from the start and update them as the terrain changes
-
-  Option 2:
-    Keep googling XD
-*/
-
 public partial class TerrainMain : MonoBehaviour
 {
     public Camera cam;
@@ -24,10 +11,6 @@ public partial class TerrainMain : MonoBehaviour
     public int[] triangles;
     public Vector3[] normals;
     public Vector2[] uvs;
-    public Renderer renderer;
-    public Material pathMaterial;
-
-    public int vertTestNum; //Test
 
     public int curPlayerQuad;
     private bool updateTerrain;
@@ -45,7 +28,7 @@ public partial class TerrainMain : MonoBehaviour
         public List<int> midLeft;
         public List<int> farLeft;
         public terrainFocus focus;
-        public float[] heightAdjustment;
+        public float?[] heightAdjustment;
         public int[] addedVerts;
         public int[] addedTriangles;
         public bool isExplored;
@@ -56,8 +39,6 @@ public partial class TerrainMain : MonoBehaviour
     private EnemySpawnController enemySpawnObj;
     private GameObject player;
 
-    public Material mat;
-
 
     /* Start
       => Initialize Variables
@@ -65,7 +46,6 @@ public partial class TerrainMain : MonoBehaviour
     */
     void Start()
     {
-        vertTestNum = 0; //Test
 
         updateTerrain = false;
 
@@ -88,14 +68,14 @@ public partial class TerrainMain : MonoBehaviour
 
         //Initialize tile values
         for (int i=0; i<terrainTiles.Length; i++){
-          terrainTiles[i].isExplored = false;
+          terrainTiles[i].isExplored = true;
           terrainTiles[i].vertNum = new List<int>();
           terrainTiles[i].farRight = new List<int>();
           terrainTiles[i].midRight = new List<int>();
           terrainTiles[i].midLeft = new List<int>();
           terrainTiles[i].farLeft = new List<int>();
           terrainTiles[i].focus = terrainFocus.Flat;
-          terrainTiles[i].heightAdjustment = new float[6]; //FL = [0], ML = [1], MR = [2], FR = [3], CWCliff = [4], CCWCliff = [5]
+          terrainTiles[i].heightAdjustment = new float?[6] {null, null, null, null, null, null}; //FL = [0], ML = [1], MR = [2], FR = [3], CWCliff = [4], CCWCliff = [5]
           terrainTiles[i].addedVerts = new int[] {-1, -1, -1, -1}; //CwCliff = [0][1] && CcwCliff = [2][3]
           terrainTiles[i].addedTriangles = new int[] {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
           terrainTiles[i].enviroment.smallTrees = new List<GameObject>();
@@ -110,8 +90,6 @@ public partial class TerrainMain : MonoBehaviour
         uvs = new Vector2[vertices.Length];
         EstablishUV();
 
-        // renderer = GetComponent<MeshFilter>().GetComponent<Renderer>();
-        renderer = GetComponent<MeshRenderer>().GetComponent<Renderer>();
 
         //Determine which vertices go to which quadrent
         for (int i=0; i<vertices.Length; i++){
@@ -131,64 +109,6 @@ public partial class TerrainMain : MonoBehaviour
         }
 
         DetermineVerticeGroups();
-
-        // Testing Left
-        // for (int j=0; j<terrainTiles.Length; j++){
-        //   for(int i=0; i<4; i++){
-        //     vertices[terrainTiles[j].farRight[i]].z = 0.06f;
-        //   }
-        //   for(int i=0; i<4; i++){
-        //     vertices[terrainTiles[j].midRight[i]].z = 0.06f;
-        //   }
-        //   for(int i=0; i<4; i++){
-        //     vertices[terrainTiles[j].midLeft[i]].z = 0.06f;
-        //   }
-        //   for(int i=0; i<4; i++){
-        //     vertices[terrainTiles[j].farLeft[i]].z = 0.06f;
-        //   }
-        // }
-
-        // //Testing Middle
-        // for(int i=0; i<4; i++){
-        //   vertices[terrainTiles[4].farRight[i]].z = 0.06f;
-        // }
-        // for(int i=0; i<4; i++){
-        //   vertices[terrainTiles[4].midRight[i]].z = 0.06f;
-        // }
-        // for(int i=0; i<4; i++){
-        //   vertices[terrainTiles[4].midLeft[i]].z = 0.06f;
-        // }
-        // for(int i=0; i<4; i++){
-        //   vertices[terrainTiles[4].farLeft[i]].z = 0.06f;
-        // }
-        //
-        // // //Testing Right
-        // for(int i=0; i<4; i++){
-        //   vertices[terrainTiles[3].farRight[i]].z = 0.06f;
-        // }
-        // for(int i=0; i<4; i++){
-        //   vertices[terrainTiles[3].midRight[i]].z = 0.06f;
-        // }
-        // for(int i=0; i<4; i++){
-        //   vertices[terrainTiles[3].midLeft[i]].z = 0.06f;
-        // }
-        // for(int i=0; i<4; i++){
-        //   vertices[terrainTiles[3].farLeft[i]].z = 0.06f;
-        //}
-
-        terrainTiles[0].isExplored = true;
-        terrainTiles[1].isExplored = true;
-        terrainTiles[2].isExplored = true;
-        terrainTiles[3].isExplored = true;
-        terrainTiles[4].isExplored = true;
-        terrainTiles[5].isExplored = true;
-        terrainTiles[6].isExplored = true;
-        terrainTiles[7].isExplored = true;
-
-        // Debug.Log("Vert: " + vertices.Length + " uvs: " + mesh.uv.Length);
-        // for (int i=0; i<20; i++){
-        //   Debug.Log("UV " + i + ": " + uvs[i].x + " " + uvs[i].y);
-        // }
     }
 
 
@@ -212,14 +132,14 @@ public partial class TerrainMain : MonoBehaviour
 
 
         for (int j=0; j<terrainTiles[i].heightAdjustment.Length; j++){
-          if (terrainTiles[i].heightAdjustment[j] != 0f){
+          if (terrainTiles[i].heightAdjustment[j] != null){
             UpdateVertHeight(i, j);
           }
         }
 
         //Check for CwCliff
         if (terrainTiles[i].addedVerts[0] != -1){
-          if (terrainTiles[i].heightAdjustment[4] == 0f){
+          if (terrainTiles[i].heightAdjustment[4] == null){
             if (vertices[terrainTiles[i].addedVerts[0]].z == vertices[terrainTiles[i].farLeft[0]].z ){
               ResetTerrainTile(i, true);
             }
@@ -228,9 +148,9 @@ public partial class TerrainMain : MonoBehaviour
 
         //Check for CcwCliff
         if (terrainTiles[i].addedVerts[2] != -1){
-          if (terrainTiles[i].heightAdjustment[5] == 0f){
+          if (terrainTiles[i].heightAdjustment[5] == null){
             if (vertices[terrainTiles[i].addedVerts[2]].z == vertices[terrainTiles[i].farRight[0]].z){
-              // ResetTerrainTile(i, false);
+              ResetTerrainTile(i, false);
             }
           }
         }
@@ -264,19 +184,13 @@ public partial class TerrainMain : MonoBehaviour
       }
 
 
-      //Testing
-      vertices[vertTestNum] = new Vector3(vertices[vertTestNum].x, vertices[vertTestNum].y, 0.05f);
-
-
       pulse = false;
 
       //Update mesh
-      mesh.Clear(); //NOTE: this will remove the error assosiated with not enough verts in the mesh
+      mesh.Clear();
+
       mesh.vertices = vertices;
       mesh.triangles = triangles;
-
-      uvs = new Vector2[vertices.Length]; //Testing
-      EstablishUV(); //Testing
       mesh.uv = uvs;
 
       mesh.RecalculateNormals();
@@ -287,7 +201,7 @@ public partial class TerrainMain : MonoBehaviour
       GetComponent<MeshCollider>().sharedMesh = mesh;
     }
 
-
+    //NOTE: draws the normals
     // void OnDrawGizmosSelected()
     // {
     //     // Draws a blue line from this transform to the target

@@ -2610,15 +2610,11 @@ MonoBehaviour:
   triangles: 
   normals: []
   uvs: []
-  renderer: {fileID: 0}
-  pathMaterial: {fileID: 2100000, guid: 35399b6fb92c02a419a795cc9026b268, type: 2}
-  vertTestNum: 0
   curPlayerQuad: 0
   maxTerrainHeight: 0.1
   minTerrainHeight: 0
   pulse: 0
   adjustmentSpeed: 0.02
-  mat: {fileID: 0}
 --- !u!64 &1785445935
 MeshCollider:
   m_ObjectHideFlags: 0
