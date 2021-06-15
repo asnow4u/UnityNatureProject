@@ -1,0 +1,20 @@
+fileFormatVersion: 2
+guid: e763348821f23f341bbf7e5aec0ebb91
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - waterSymbolPrefab: {instanceID: 0}
+  - healSymbolPrefab: {instanceID: 0}
+  - thornSymbolPrefab: {instanceID: 0}
+  - otherSymbolPrefab: {instanceID: 0}
+  - actionSelectorPrefab: {instanceID: 0}
+  - thorns: {instanceID: 0}
+  - thornTargetArea: {instanceID: 0}
+  - powerReticle: {fileID: 1754542966351680660, guid: decbb76320b82da4cbda733caf760e57,
+      type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -44,7 +44,7 @@ public partial class TerrainMain : MonoBehaviour
       => Initialize Variables
       => Set up mesh verts into specified terrainTiles
     */
-    void Start()
+    void Awake()
     {
 
         updateTerrain = false;
@@ -159,7 +159,7 @@ public partial class TerrainMain : MonoBehaviour
 
 
         //TODO: NOTE: Will adjust this later
-        if(terrainTiles[i].isExplored && TerrainConstraints(i)){
+        if(terrainTiles[i].isExplored && TerrainConstraints(i) && pulse){ //pulse added for testing
 
             //TODO: need to fix
             //Check that terrain is outside of left eye view
@@ -174,7 +174,7 @@ public partial class TerrainMain : MonoBehaviour
 
 
 
-                //EnvironmentPlacement(i); //NOTE: will need to set isExplored to false here or in the enemy spawn
+                EnvironmentPlacement(i); //NOTE: will need to set isExplored to false here or in the enemy spawn
 
               // }
             // }

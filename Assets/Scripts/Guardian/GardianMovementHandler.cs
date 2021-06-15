@@ -2,36 +2,103 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public partial class GardianController : MonoBehaviour
+public class GardianMovementHandler : GardianController
 {
 
+    //Movement
     private float momentumSpeed;
+    private float moveSpeed;
 
-    public float maxMoveSpeed;
-    public float accelerationRate;
+    [SerializeField]
+    private float maxMoveSpeed;
+
+    [SerializeField]
+    private float accelerationRate;
+
     private float dragRate;
-    public float drag;
-    public float airDrag;
-    public float moveSpeed;
 
-    public bool sliding;
-    public float slidingAcceleration;
-    public float slidingForce;
-    public float terrainAngle;
-    public float steepAngle;
+    [SerializeField]
+    private float drag;
 
-    public bool dashing;
-    public bool dashCoolDown;
-    public float dashSpeed;
-    public float maxDashSpeed;
-    public float dashTime;
-    public float dashUpwardForce;
+    [SerializeField]
+    private float airDrag;
 
-    public bool jumping;
-    public float jumpForce;
-    public float fallMultiplier;
-    public float lowJumpMultiplier;
-    public bool clockWiseDirection;
+    private bool sliding;
+
+    [SerializeField]
+    private float slidingAcceleration;
+
+    [SerializeField]
+    private float slidingForce;
+
+    private float terrainAngle;
+
+    [SerializeField]
+    private float steepAngle;
+
+    private bool dashing;
+    private bool dashCoolDown;
+
+
+    private float dashSpeed;
+
+    [SerializeField]
+    private float maxDashSpeed;
+
+    [SerializeField]
+    private float dashTime;
+
+    [SerializeField]
+    private float dashUpwardForce;
+
+    private bool jumping;
+
+    [SerializeField]
+    private float jumpForce;
+
+    [SerializeField]
+    private float fallMultiplier;
+
+    [SerializeField]
+    private float lowJumpMultiplier;
+
+    private bool clockWiseDirection;
+
+    [SerializeField]
+    private LayerMask groundLayer;
+
+    [SerializeField]
+    private float groundDist;
+
+    /* Start
+      => Initialize Variables
+    */
+    void Start() {
+
+      clockWiseDirection = true;
+      sliding = false;
+
+    }
+
+    void FixedUpdate() {
+
+      UpdateForces();
+    }
+
+    void Update() {
+
+      //Update isGrounded bool with animator
+      // if (IsGrounded()){
+      //   animator.SetBool("isGrounded", true);
+      // } else {
+      //   animator.SetBool("isGrounded", false);
+      // }
+
+      //Determine if character is falling
+      if (jumping && (Mathf.Round(rb.velocity.y * 100f) / 100f) < 0){
+        jumping = false;
+      }
+    }
 
 
     /* UpdateMovement
@@ -222,6 +289,14 @@ public partial class GardianController : MonoBehaviour
     }
 
 
+    /* TestOnGround
+      => Check that the player is on the ground
+    */
+    public bool IsGrounded(){
+      return Physics.Raycast(transform.position + transform.up, -transform.up, groundDist, groundLayer);
+    }
+
+
     /* LevelToGround
       => Update the terrain angle using a downward raycast
       => Rotate character according to terrain angle
@@ -276,21 +351,26 @@ public partial class GardianController : MonoBehaviour
     //TODO: Either here or in a new function, apply small forces to nudge the player back to the center if they are off.
     private void UpdateForces(){
 
-      //Swing Force
-      if (curSwingPoint != null){
-        UpdateSwing();
-
       //Small Jump / Fall force
-      } else {
-        if (rb.velocity.y < 0){
-          rb.velocity += Vector3.up * Physics.gravity.y * (fallMultiplier - 1) * Time.deltaTime;
+      if (rb.velocity.y < 0){
+        rb.velocity += Vector3.up * Physics.gravity.y * (fallMultiplier - 1) * Time.deltaTime;
 
-        } else if (rb.velocity.y > 0 && !OVRInput.Get(OVRInput.RawButton.A)){
-          //TODO: NOT SURE IF NEED TO CHANGE need to prevent when just moving around. check that is grounded is false?, or that jump has been pressed?
-          rb.velocity += Vector3.up * Physics.gravity.y * (lowJumpMultiplier - 1) * Time.deltaTime;
+      } else if (rb.velocity.y > 0 && !OVRInput.Get(OVRInput.RawButton.A)){
+        //TODO: NOT SURE IF NEED TO CHANGE need to prevent when just moving around. check that is grounded is false?, or that jump has been pressed?
+        rb.velocity += Vector3.up * Physics.gravity.y * (lowJumpMultiplier - 1) * Time.deltaTime;
 
-        }
       }
+
+    }
+
+
+    /* Getters and Setters
+      => Get values from this class
+      => Set values from this class
+    */
+    public bool ClockWiseDirection {
+      get {return clockWiseDirection;}
+      set {clockWiseDirection = value;}
     }
 
 
